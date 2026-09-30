@@ -21,6 +21,7 @@ const NOME_SITE = "ONG Mãos Solidárias";
 
 let raiz = null;
 let paginaAtual = null;
+let moduloAtual = null;
 
 /* "#/projetos/voluntariado" → { pagina: "projetos", secao: "voluntariado" } */
 function lerEndereco() {
@@ -57,7 +58,12 @@ function renderizar() {
 
   // Só redesenha o <main> quando a página muda
   if (pagina !== paginaAtual) {
+    // Deixa a página anterior liberar o que criou (ex.: o gráfico da biblioteca Chart.js)
+    if (moduloAtual && moduloAtual.sair) {
+      moduloAtual.sair();
+    }
     const modulo = ROTAS[pagina] || naoEncontrada;
+    moduloAtual = modulo;
     raiz.innerHTML = modulo.render();
     document.title = `${modulo.titulo} | ${NOME_SITE}`;
     atualizarMenu(pagina);
