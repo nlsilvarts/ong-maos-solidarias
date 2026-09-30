@@ -1,0 +1,10 @@
+# Dependências instaladas pelo npm (recriadas com "npm install")
+node_modules/
+
+# Arquivos do sistema e de editores
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Logs
+*.log
