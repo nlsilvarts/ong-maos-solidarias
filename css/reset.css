@@ -1,0 +1,40 @@
+/* =========================================================
+   ONG Mãos Solidárias - Reset
+   Normaliza o comportamento padrão dos navegadores antes
+   dos estilos do projeto (carregado antes do style.css).
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* O atributo hidden sempre esconde, mesmo que o componente defina display */
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Campos e botões herdam a fonte da página */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+/* Elementos que recebem foco pelo roteador (títulos, <main>) não são
+   interativos e, por isso, não exibem contorno de foco */
+[tabindex="-1"]:focus {
+  outline: none;
+}
