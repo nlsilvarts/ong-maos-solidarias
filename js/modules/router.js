@@ -12,9 +12,10 @@
  */
 import inicio from "./paginas/inicio.js";
 import projetos from "./paginas/projetos.js";
+import componentes from "./paginas/componentes.js";
 import naoEncontrada from "./paginas/nao-encontrada.js";
 
-const ROTAS = { inicio, projetos };
+const ROTAS = { inicio, projetos, componentes };
 const NOME_SITE = "ONG Mãos Solidárias";
 
 let raiz = null;
