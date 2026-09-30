@@ -2,8 +2,26 @@
  * Página de projetos: frentes de atuação, projetos, voluntariado,
  * campanhas de doação e formas de doar.
  */
-import { projetos, campanhas, areasVoluntariado } from "../dados.js";
-import { cartaoProjeto, cartaoCampanha, alerta, escapar } from "../templates.js";
+import { projetos, campanhas, areasVoluntariado, percentualArrecadado } from "../dados.js";
+import { cartaoProjeto, cartaoCampanha, alerta, escapar, numero } from "../templates.js";
+import { criarGraficoCampanhas, destruirGraficoCampanhas } from "../grafico-campanhas.js";
+
+/* Resumo em texto do gráfico, para leitores de tela */
+function descricaoGrafico() {
+  const itens = campanhas.map((campanha) => `${campanha.titulo}, ${percentualArrecadado(campanha)}%`);
+  return `Gráfico de barras com o percentual da meta alcançado: ${itens.join("; ")}.`;
+}
+
+/* Tabela com os mesmos dados do gráfico (alternativa acessível) */
+function linhasTabela() {
+  return campanhas.map((campanha) => `
+    <tr>
+      <th scope="row">${escapar(campanha.titulo)}</th>
+      <td class="numero">${numero(campanha.arrecadado)}</td>
+      <td class="numero">${numero(campanha.quantidade)} ${escapar(campanha.unidade)}</td>
+      <td class="numero">${percentualArrecadado(campanha)}%</td>
+    </tr>`).join("");
+}
 
 export default {
   titulo: "Projetos",
@@ -55,6 +73,31 @@ export default {
           fechavel: true
         })}
         <div class="grid-12">${campanhas.map(cartaoCampanha).join("")}</div>
+
+        <div class="cartao grafico">
+          <h3>Quanto já arrecadamos</h3>
+          <p class="dica">Percentual da meta alcançado em cada campanha.</p>
+          <div class="grafico-area">
+            <canvas id="grafico-campanhas" role="img" aria-label="${escapar(descricaoGrafico())}"></canvas>
+          </div>
+          <p class="dica" id="grafico-aviso" hidden>Não foi possível carregar o gráfico. Os dados estão na tabela abaixo.</p>
+          <details id="grafico-tabela">
+            <summary>Ver os dados em tabela</summary>
+            <div class="tabela-rolavel">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Campanha</th>
+                    <th scope="col" class="numero">Arrecadado</th>
+                    <th scope="col" class="numero">Meta</th>
+                    <th scope="col" class="numero">Alcançado</th>
+                  </tr>
+                </thead>
+                <tbody>${linhasTabela()}</tbody>
+              </table>
+            </div>
+          </details>
+        </div>
       </section>
 
       <section id="formas-de-doar" class="destaque">
@@ -72,5 +115,24 @@ export default {
           <strong>Horário:</strong> segunda a sexta, das 9h às 17h
         </address>
       </section>`;
+  },
+
+  // Chamado pelo roteador depois que o HTML da página entra no <main>
+  iniciar(raiz) {
+    criarGraficoCampanhas(raiz.querySelector("#grafico-campanhas"), campanhas).catch(() => {
+      // Se a biblioteca não carregar, a página continua útil: a tabela fica aberta
+      const area = raiz.querySelector(".grafico-area");
+      if (!area) {
+        return; // o usuário já saiu da página
+      }
+      area.hidden = true;
+      raiz.querySelector("#grafico-aviso").hidden = false;
+      raiz.querySelector("#grafico-tabela").open = true;
+    });
+  },
+
+  // Chamado pelo roteador antes de trocar de página
+  sair() {
+    destruirGraficoCampanhas();
   }
 };
