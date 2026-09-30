@@ -1,0 +1,1316 @@
+/* =========================================================
+   ONG Mãos Solidárias - Folha de estilo
+   1. Design System (variáveis customizadas)
+   ========================================================= */
+
+:root {
+  /* ---------- Cores primárias (verde: esperança, cuidado) ---------- */
+  --cor-primaria: #2e7d5a;         /* cabeçalho, títulos h3, bordas de destaque */
+  --cor-primaria-escura: #1f5a40;  /* títulos h2, links, rodapé */
+  --cor-primaria-clara: #e3f2ea;   /* fundos de destaque, bordas de fieldset */
+
+  /* ---------- Cores secundárias (laranja: energia, ação) ---------- */
+  --cor-secundaria: #f28c28;         /* detalhes decorativos e foco (sem texto) */
+  --cor-secundaria-escura: #a65300;  /* botões de ação com texto branco */
+
+  /* ---------- Tons neutros ---------- */
+  --cor-texto: #222222;        /* texto principal */
+  --cor-texto-suave: #555555;  /* legendas, dicas, botão secundário */
+  --cor-borda: #bbbbbb;        /* bordas de campos */
+  --cor-fundo: #fdfaf4;        /* fundo da página (off-white quente) */
+  --cor-branco: #ffffff;       /* cartões, formulário, texto sobre cor */
+
+  /* ---------- Cores de feedback ---------- */
+  --cor-erro: #b3261e;
+  --cor-erro-fundo: #fdeceb;
+  --cor-sucesso: #2e7d5a;
+  --cor-sucesso-fundo: #f3faf6;
+  --cor-info: #1d5a8c;
+  --cor-info-fundo: #e7f0f9;
+  --cor-aviso: #8a5d00;
+  --cor-aviso-fundo: #fff4d6;
+  --cor-secundaria-clara: #fdecd9;
+  --cor-neutra-clara: #eeeeee;
+
+  /* ---------- Gráficos ---------- */
+  --cor-grafico: #1f8a5a;   /* verde da marca com croma suficiente para marcas de gráfico */
+  --cor-grade: #e5e5e5;     /* linhas de grade e eixos: discretas, um tom acima do fundo */
+
+  /* ---------- Estados interativos ---------- */
+  --cor-secundaria-hover: #8a4500;   /* botão principal com o mouse */
+  --cor-secundaria-ativa: #6f3800;   /* botão principal pressionado */
+  --cor-neutra-hover: #333333;       /* botão secundário com o mouse */
+  --cor-borda-campo: #767676;        /* borda dos campos (contraste 4,5:1) */
+  --cor-foco: #1f5a40;               /* contorno de foco (contraste 8:1) */
+  --transicao: 0.2s ease;
+
+  /* ---------- Tipografia ---------- */
+  --fonte-base: "Segoe UI", Arial, Helvetica, sans-serif;
+  /* Escala modular 1.25 (terça maior) sobre base de 16px */
+  --texto-xs: 0.8rem;    /* 12,8px - dicas e textos auxiliares */
+  --texto-sm: 0.875rem;  /* 14px   - legendas e rodapé */
+  --texto-md: 1rem;      /* 16px   - corpo do texto */
+  --texto-lg: 1.25rem;   /* 20px   - h3 e subtítulos */
+  --texto-xl: 1.563rem;  /* 25px   - h2 */
+  --texto-2xl: 1.953rem; /* 31px   - h1 */
+  --peso-normal: 400;
+  --peso-semi: 600;
+  --peso-negrito: 700;
+  --altura-linha: 1.6;
+  --altura-linha-titulo: 1.25;
+
+  /* ---------- Espaçamentos (escala modular de 8px) ---------- */
+  --espaco-1: 0.25rem; /* 4px  */
+  --espaco-2: 0.5rem;  /* 8px  */
+  --espaco-3: 1rem;    /* 16px */
+  --espaco-4: 1.5rem;  /* 24px */
+  --espaco-5: 2rem;    /* 32px */
+  --espaco-6: 3rem;    /* 48px */
+  --espaco-7: 4rem;    /* 64px */
+
+  /* ---------- Bordas, sombras e larguras ---------- */
+  --raio-sm: 6px;
+  --raio-md: 10px;
+  --raio-pill: 999px;
+  --sombra: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --sombra-elevada: 0 6px 16px rgba(0, 0, 0, 0.18);
+  --sombra-pressionada: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  --anel-campo: 0 0 0 4px rgba(46, 125, 90, 0.2);
+  --largura-max: 1100px;
+
+  /* ---------- Grid ---------- */
+  --grid-colunas: 12;
+  --grid-gap: var(--espaco-3);
+  --container-padding: var(--espaco-3);
+}
+
+/* =========================================================
+   2. Base
+   ========================================================= */
+
+/* Regras de normalização (box-sizing, [hidden], imagens) ficam em reset.css */
+
+body {
+  font-family: var(--fonte-base);
+  font-size: var(--texto-md);
+  line-height: var(--altura-linha);
+  color: var(--cor-texto);
+  background: var(--cor-fundo);
+}
+
+a {
+  color: var(--cor-primaria-escura);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+/* Sobre o fundo verde do cabeçalho, o contorno de foco fica branco */
+header a:focus-visible,
+header button:focus-visible,
+.pular-conteudo:focus-visible {
+  outline-color: var(--cor-branco);
+}
+
+h1,
+h2,
+h3 {
+  line-height: var(--altura-linha-titulo);
+  margin: 0 0 var(--espaco-3);
+}
+
+h1 {
+  font-size: var(--texto-2xl);
+}
+
+h2 {
+  font-size: var(--texto-xl);
+  color: var(--cor-primaria-escura);
+  border-bottom: 3px solid var(--cor-secundaria);
+  padding-bottom: var(--espaco-1);
+  display: inline-block;
+}
+
+h3 {
+  font-size: var(--texto-lg);
+  color: var(--cor-primaria);
+}
+
+p {
+  margin: 0 0 var(--espaco-3);
+}
+
+/* Link para pular direto ao conteúdo (acessibilidade) */
+.pular-conteudo {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--cor-secundaria-escura);
+  color: var(--cor-branco);
+  padding: var(--espaco-2) var(--espaco-3);
+  z-index: 10;
+}
+
+.pular-conteudo:focus {
+  left: var(--espaco-3);
+}
+
+/* =========================================================
+   3. Cabeçalho e navegação (base: celulares)
+   ========================================================= */
+
+/* Preferência "Texto maior": como todo o Design System usa rem,
+   aumentar a fonte da raiz amplia textos e espaçamentos juntos */
+html.texto-grande {
+  font-size: 112.5%;
+}
+
+/* ---------- Barra de acessibilidade ---------- */
+.barra-acessibilidade {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--espaco-1) var(--espaco-3);
+  background-color: var(--cor-primaria-escura);
+}
+
+.botao-texto {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-1);
+  padding: var(--espaco-1) var(--espaco-3);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semi);
+  color: var(--cor-branco);
+  background-color: transparent;
+  border: 1px solid var(--cor-branco);
+  border-radius: var(--raio-pill);
+  cursor: pointer;
+  transition: background-color var(--transicao), color var(--transicao);
+}
+
+.botao-texto:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Botão ligado: fundo branco (aria-pressed também informa leitores de tela) */
+.botao-texto[aria-pressed="true"] {
+  color: var(--cor-primaria-escura);
+  background-color: var(--cor-branco);
+}
+
+.barra-acessibilidade button:focus-visible {
+  outline-color: var(--cor-branco);
+}
+
+header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 var(--espaco-3);
+  background: var(--cor-primaria);
+  color: var(--cor-branco);
+  padding: var(--espaco-3);
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.marca img {
+  width: 56px;
+  height: 56px;
+}
+
+.marca h1,
+.marca .nome-ong {
+  margin: 0;
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-negrito);
+  line-height: var(--altura-linha-titulo);
+  color: var(--cor-branco);
+}
+
+.marca p {
+  margin: 0;
+  font-size: var(--texto-sm);
+}
+
+/* ---------- Botão hambúrguer ---------- */
+/* Sem JavaScript o botão fica oculto e o menu aparece aberto */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  background: transparent;
+  border: 2px solid var(--cor-branco);
+  border-radius: var(--raio-sm);
+  cursor: pointer;
+}
+
+.js .menu-toggle {
+  display: flex;
+}
+
+.menu-toggle:hover {
+  background: var(--cor-primaria-escura);
+}
+
+.icone-linha {
+  display: block;
+  width: 100%;
+  height: 3px;
+  background: var(--cor-branco);
+  border-radius: 2px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Ícone vira um "X" quando o menu está aberto */
+.menu-toggle[aria-expanded="true"] .icone-linha:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.menu-toggle[aria-expanded="true"] .icone-linha:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle[aria-expanded="true"] .icone-linha:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* ---------- Lista do menu ---------- */
+nav {
+  flex: 1 1 100%;
+}
+
+.menu-lista {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  margin: 0;
+  padding: 0;
+}
+
+.menu-lista > li:first-child {
+  margin-top: var(--espaco-3);
+}
+
+/* Menu recolhido no celular (só quando o JavaScript está ativo) */
+.js .menu-lista {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transition: max-height 0.35s ease, opacity 0.35s ease, visibility 0.35s;
+}
+
+.js .menu-toggle[aria-expanded="true"] + nav .menu-lista {
+  max-height: 30rem;
+  opacity: 1;
+  visibility: visible;
+}
+
+.menu-lista a {
+  display: block;
+  color: var(--cor-branco);
+  text-decoration: none;
+  font-weight: var(--peso-semi);
+  padding: var(--espaco-2) var(--espaco-3);
+  border-radius: var(--raio-sm);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.menu-lista a:hover,
+.menu-lista a[aria-current="page"] {
+  background: var(--cor-branco);
+  color: var(--cor-primaria-escura);
+}
+
+/* Submenu no celular: sempre visível, recuado abaixo de "Projetos" */
+.submenu {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 var(--espaco-4);
+}
+
+.submenu a {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-normal);
+}
+
+/* =========================================================
+   4. Conteúdo principal e componentes
+   ========================================================= */
+
+main {
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: var(--espaco-4) var(--container-padding) var(--espaco-6);
+}
+
+main > section {
+  margin-bottom: var(--espaco-6);
+}
+
+main > h1 {
+  color: var(--cor-primaria-escura);
+}
+
+/* Mensagem exibida enquanto o roteador ainda não carregou a página */
+.carregando {
+  color: var(--cor-texto-suave);
+}
+
+figure {
+  margin: 0 0 var(--espaco-3);
+}
+
+figcaption {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+  margin-top: var(--espaco-2);
+}
+
+.destaque {
+  background: var(--cor-primaria-clara);
+  border-left: 5px solid var(--cor-primaria);
+  padding: var(--espaco-3);
+  border-radius: var(--raio-md);
+}
+
+.cartao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  align-self: stretch;
+  background: var(--cor-branco);
+  border-radius: var(--raio-md);
+  padding: var(--espaco-3);
+  box-shadow: var(--sombra);
+}
+
+/* O espaço entre os itens do cartão vem do gap, não das margens */
+.cartao > *,
+.cartao > .badges {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.cartao img {
+  border-radius: var(--raio-sm);
+  margin-bottom: var(--espaco-3);
+}
+
+/* ---------- Botões e seus estados ---------- */
+.botao {
+  display: inline-block;
+  background-color: var(--cor-secundaria-escura);
+  color: var(--cor-branco);
+  font-family: inherit;
+  font-size: var(--texto-md);
+  font-weight: var(--peso-negrito);
+  text-decoration: none;
+  border: none;
+  padding: var(--espaco-2) var(--espaco-4);
+  border-radius: var(--raio-pill);
+  box-shadow: var(--sombra);
+  cursor: pointer;
+  transition: background-color var(--transicao), box-shadow var(--transicao),
+    transform var(--transicao), opacity var(--transicao);
+}
+
+/* hover: cor mais escura, sombra maior e leve elevação */
+.botao:hover:not(:disabled) {
+  background-color: var(--cor-secundaria-hover);
+  box-shadow: var(--sombra-elevada);
+  transform: translateY(-2px);
+}
+
+/* active: botão "afunda" ao ser pressionado */
+.botao:active:not(:disabled) {
+  background-color: var(--cor-secundaria-ativa);
+  box-shadow: var(--sombra-pressionada);
+  transform: translateY(0) scale(0.98);
+}
+
+/* focus: contorno de 3px afastado do botão (regra global de :focus-visible) */
+.botao:focus-visible {
+  outline-offset: 3px;
+}
+
+/* disabled: botão apagado, sem sombra e sem efeitos */
+.botao:disabled {
+  opacity: 0.5;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.botao-secundario {
+  background-color: var(--cor-texto-suave);
+}
+
+.botao-secundario:hover:not(:disabled) {
+  background-color: var(--cor-neutra-hover);
+}
+
+.botao-secundario:active:not(:disabled) {
+  background-color: var(--cor-texto);
+}
+
+address {
+  font-style: normal;
+}
+
+/* =========================================================
+   5. Formulário
+   ========================================================= */
+
+form {
+  background: var(--cor-branco);
+  padding: var(--espaco-4);
+  border-radius: var(--raio-md);
+  box-shadow: var(--sombra);
+}
+
+fieldset {
+  border: 2px solid var(--cor-primaria-clara);
+  border-radius: var(--raio-md);
+  margin: 0 0 var(--espaco-4);
+  padding: var(--espaco-3);
+}
+
+legend {
+  font-weight: var(--peso-negrito);
+  color: var(--cor-primaria-escura);
+  padding: 0 var(--espaco-2);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  font-weight: var(--peso-semi);
+  margin-bottom: var(--espaco-1);
+}
+
+/* ---------- Campos e seus estados ---------- */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="date"],
+select,
+textarea {
+  font: inherit;
+  padding: var(--espaco-2);
+  border: 2px solid var(--cor-borda-campo);
+  border-radius: var(--raio-sm);
+  background-color: var(--cor-branco);
+  width: 100%;
+  transition: border-color var(--transicao), box-shadow var(--transicao),
+    background-color var(--transicao);
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: var(--cor-texto-suave);
+}
+
+/* focus: borda verde e um halo suave ao redor do campo */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--cor-primaria);
+  box-shadow: var(--anel-campo);
+}
+
+/* Rádios e checkboxes na cor da marca */
+input[type="radio"],
+input[type="checkbox"] {
+  accent-color: var(--cor-primaria);
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+/* ---------- Feedback de preenchimento ----------
+   As classes .campo-valido e .campo-invalido são aplicadas pelo JavaScript
+   (js/modules/formulario.js) no contêiner de cada campo, depois que o
+   usuário interage com ele ou tenta enviar o formulário. */
+
+/* Sucesso: borda verde, fundo verde-claro e ícone de check */
+.campo-valido > :is(input, select, textarea) {
+  border-color: var(--cor-sucesso);
+  background-color: var(--cor-sucesso-fundo);
+}
+
+/* Erro: borda vermelha, fundo rosado e halo vermelho no foco */
+.campo-invalido > :is(input, select, textarea) {
+  border-color: var(--cor-erro);
+  background-color: var(--cor-erro-fundo);
+}
+
+.campo-invalido > :is(input, select, textarea):focus {
+  box-shadow: 0 0 0 4px rgba(179, 38, 30, 0.2);
+}
+
+/* Ícones (não dependem só da cor para comunicar o estado) */
+.campo-valido > input:is([type="text"], [type="email"], [type="tel"]),
+.campo-invalido > input:is([type="text"], [type="email"], [type="tel"]) {
+  padding-right: 2.5rem;
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1.1rem;
+}
+
+.campo-valido > input:is([type="text"], [type="email"], [type="tel"]) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%232e7d5a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' d='M3 8.5l3.5 3.5L13 5'/%3E%3C/svg%3E");
+}
+
+.campo-invalido > input:is([type="text"], [type="email"], [type="tel"]) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%23b3261e'/%3E%3Cpath stroke='%23fff' stroke-width='2' stroke-linecap='round' d='M8 4.5v4'/%3E%3Ccircle cx='8' cy='11.5' r='1.1' fill='%23fff'/%3E%3C/svg%3E");
+}
+
+.dica {
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-suave);
+  margin-top: var(--espaco-1);
+}
+
+/* Rótulo em vermelho e mensagem injetada abaixo do campo */
+.campo-invalido > label {
+  color: var(--cor-erro);
+}
+
+.mensagem-erro {
+  margin: var(--espaco-1) 0 0;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semi);
+  color: var(--cor-erro);
+}
+
+/* Grupos de rádio e o aceite da LGPD ganham borda vermelha se ficarem sem resposta */
+fieldset.campo-invalido {
+  border-color: var(--cor-erro);
+  background-color: var(--cor-erro-fundo);
+}
+
+/* Lista de links no alerta de resumo de erros */
+.lista-erros {
+  margin: var(--espaco-2) 0 0;
+  padding-left: var(--espaco-4);
+}
+
+.lista-erros a {
+  color: var(--cor-erro);
+  font-weight: var(--peso-semi);
+}
+
+.obrigatorio {
+  color: var(--cor-erro);
+}
+
+.opcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2) var(--espaco-4);
+}
+
+.opcoes label {
+  font-weight: var(--peso-normal);
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+.acoes {
+  display: flex;
+  gap: var(--espaco-3);
+  flex-wrap: wrap;
+}
+
+/* =========================================================
+   6. Componentes de feedback
+   Cada variante define duas variáveis locais (--fb-cor e --fb-fundo);
+   badges, alertas e toasts apenas leem essas variáveis.
+   ========================================================= */
+
+/* ---------- Ícone de status (forma + símbolo + cor) ---------- */
+.icone-feedback {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background-color: var(--fb-cor);
+  color: var(--cor-branco);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-negrito);
+  line-height: 1;
+}
+
+/* Aviso em triângulo e erro em octógono: a forma também comunica o estado */
+.alerta-aviso .icone-feedback,
+.toast-aviso .icone-feedback {
+  border-radius: 0;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  padding-top: 0.3rem;
+}
+
+.alerta-erro .icone-feedback,
+.toast-erro .icone-feedback,
+.modal-erro .icone-feedback {
+  border-radius: 0;
+  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+}
+
+.icone-grande {
+  width: 3.5rem;
+  height: 3.5rem;
+  margin: 0 auto var(--espaco-3);
+  font-size: var(--texto-xl);
+}
+
+/* ---------- Botão de fechar (alertas, toasts e modais) ---------- */
+.botao-fechar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  font-family: inherit;
+  font-size: var(--texto-lg);
+  line-height: 1;
+  color: var(--cor-texto-suave);
+  background-color: transparent;
+  border: none;
+  border-radius: var(--raio-sm);
+  cursor: pointer;
+  transition: background-color var(--transicao), color var(--transicao);
+}
+
+.botao-fechar:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+  color: var(--cor-texto);
+}
+
+/* ---------- Badges (etiquetas) ---------- */
+.badges {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  margin: 0 0 var(--espaco-3);
+  padding: 0;
+}
+
+.badge {
+  --fb-cor: var(--cor-texto-suave);
+  --fb-fundo: var(--cor-neutra-clara);
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-negrito);
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--fb-cor);
+  background-color: var(--fb-fundo);
+  border-radius: var(--raio-pill);
+  white-space: nowrap;
+}
+
+/* ---------- Alertas ---------- */
+.alerta {
+  --fb-cor: var(--cor-info);
+  --fb-fundo: var(--cor-info-fundo);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-3);
+  margin: 0 0 var(--espaco-4);
+  padding: var(--espaco-3);
+  color: var(--cor-texto);
+  background-color: var(--fb-fundo);
+  border-left: 5px solid var(--fb-cor);
+  border-radius: var(--raio-md);
+}
+
+.alerta-conteudo {
+  flex: 1;
+}
+
+.alerta-conteudo p {
+  margin: 0;
+}
+
+.alerta-conteudo .alerta-titulo {
+  margin-bottom: var(--espaco-1);
+  font-weight: var(--peso-negrito);
+  color: var(--fb-cor);
+}
+
+.alerta .botao-fechar {
+  margin: -0.25rem -0.25rem 0 0;
+}
+
+.alerta-conteudo .alerta-acao {
+  margin-top: var(--espaco-2);
+}
+
+/* ---------- Histórico de cadastros (lido do localStorage) ---------- */
+.historico {
+  margin: 0 0 var(--espaco-4);
+  padding: var(--espaco-3);
+  background-color: var(--cor-primaria-clara);
+  border-left: 5px solid var(--cor-primaria);
+  border-radius: var(--raio-md);
+}
+
+.historico h2 {
+  font-size: var(--texto-lg);
+}
+
+.historico ul {
+  margin: var(--espaco-2) 0 var(--espaco-3);
+  padding-left: var(--espaco-4);
+}
+
+/* ---------- Toasts (notificações flutuantes) ---------- */
+.toast-area {
+  position: fixed;
+  right: var(--espaco-3);
+  bottom: var(--espaco-3);
+  left: var(--espaco-3);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  pointer-events: none;
+}
+
+.toast {
+  --fb-cor: var(--cor-info);
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  padding: var(--espaco-3);
+  color: var(--cor-texto);
+  background-color: var(--cor-branco);
+  border-left: 5px solid var(--fb-cor);
+  border-radius: var(--raio-md);
+  box-shadow: var(--sombra-elevada);
+  pointer-events: auto;
+  animation: toast-entrada 0.3s ease both;
+}
+
+.toast p {
+  flex: 1;
+  margin: 0;
+  font-size: var(--texto-sm);
+}
+
+.toast.saindo {
+  animation: toast-saida 0.3s ease both;
+}
+
+@keyframes toast-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-saida {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(1.5rem);
+  }
+}
+
+/* ---------- Modal (elemento nativo <dialog>) ---------- */
+.modal {
+  --fb-cor: var(--cor-primaria-escura);
+  width: min(28rem, calc(100% - 2rem));
+  padding: var(--espaco-5) var(--espaco-4) var(--espaco-4);
+  color: var(--cor-texto);
+  text-align: center;
+  border: none;
+  border-radius: var(--raio-md);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.3);
+}
+
+.modal[open] {
+  animation: modal-entrada 0.25s ease both;
+}
+
+.modal::backdrop {
+  background-color: rgba(16, 40, 29, 0.6);
+}
+
+/* O formulário interno do modal não herda o visual de cartão do cadastro */
+.modal form {
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.modal h2 {
+  display: block;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.modal .botao-fechar {
+  position: absolute;
+  top: var(--espaco-2);
+  right: var(--espaco-2);
+}
+
+.modal-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--espaco-3);
+  margin-top: var(--espaco-4);
+}
+
+@keyframes modal-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(1rem) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ---------- Variantes (definidas por último para prevalecer) ---------- */
+.badge-info,
+.alerta-info,
+.toast-info {
+  --fb-cor: var(--cor-info);
+  --fb-fundo: var(--cor-info-fundo);
+}
+
+.badge-sucesso,
+.alerta-sucesso,
+.toast-sucesso,
+.modal-sucesso {
+  --fb-cor: var(--cor-primaria-escura);
+  --fb-fundo: var(--cor-primaria-clara);
+}
+
+.badge-aviso,
+.alerta-aviso,
+.toast-aviso {
+  --fb-cor: var(--cor-aviso);
+  --fb-fundo: var(--cor-aviso-fundo);
+}
+
+.badge-erro,
+.alerta-erro,
+.toast-erro,
+.modal-erro {
+  --fb-cor: var(--cor-erro);
+  --fb-fundo: var(--cor-erro-fundo);
+}
+
+.badge-primaria {
+  --fb-cor: var(--cor-primaria-escura);
+  --fb-fundo: var(--cor-primaria-clara);
+}
+
+.badge-secundaria {
+  --fb-cor: var(--cor-secundaria-hover);
+  --fb-fundo: var(--cor-secundaria-clara);
+}
+
+.badge-neutra {
+  --fb-cor: var(--cor-texto-suave);
+  --fb-fundo: var(--cor-neutra-clara);
+}
+
+/* Badges de status: fundo sólido e texto branco */
+.badge-sucesso,
+.badge-aviso,
+.badge-erro {
+  color: var(--cor-branco);
+  background-color: var(--fb-cor);
+}
+
+/* ---------- Gráfico (Chart.js) ---------- */
+.grafico {
+  margin-top: var(--espaco-4);
+}
+
+/* A altura inclui a faixa do eixo x, para os rótulos não serem cortados */
+.grafico-area {
+  position: relative;
+  height: 12rem;
+}
+
+.grafico summary {
+  font-weight: var(--peso-semi);
+  color: var(--cor-primaria-escura);
+  cursor: pointer;
+}
+
+.tabela-rolavel {
+  overflow-x: auto;
+}
+
+.grafico table {
+  width: 100%;
+  margin-top: var(--espaco-2);
+  font-size: var(--texto-sm);
+  border-collapse: collapse;
+}
+
+.grafico th,
+.grafico td {
+  padding: var(--espaco-2);
+  text-align: left;
+  border-bottom: 1px solid var(--cor-grade);
+}
+
+.grafico .numero {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Apoio ao guia de componentes ---------- */
+.botao-pequeno {
+  padding: var(--espaco-1) var(--espaco-3);
+  font-size: var(--texto-sm);
+}
+
+pre {
+  margin: var(--espaco-3) 0 var(--espaco-4);
+  padding: var(--espaco-3);
+  overflow-x: auto;
+  font-size: var(--texto-sm);
+  background-color: var(--cor-neutra-clara);
+  border-radius: var(--raio-sm);
+}
+
+code {
+  font-family: Consolas, "Courier New", monospace;
+}
+
+/* =========================================================
+   7. Rodapé
+   ========================================================= */
+
+footer {
+  background: var(--cor-primaria-escura);
+  color: var(--cor-branco);
+  text-align: center;
+  padding: var(--espaco-4) var(--espaco-3);
+  font-size: var(--texto-sm);
+}
+
+footer a {
+  color: var(--cor-branco);
+}
+
+footer p {
+  margin: var(--espaco-1) 0;
+}
+
+/* =========================================================
+   8. Grid de 12 colunas
+   ========================================================= */
+
+.grid-12 {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-colunas), minmax(0, 1fr));
+  gap: var(--grid-gap);
+  align-items: start;
+}
+
+/* Mobile first: sem classe, o item ocupa as 12 colunas */
+.grid-12 > * {
+  grid-column: span 12;
+}
+
+.col-1 { grid-column: span 1; }
+.col-2 { grid-column: span 2; }
+.col-3 { grid-column: span 3; }
+.col-4 { grid-column: span 4; }
+.col-5 { grid-column: span 5; }
+.col-6 { grid-column: span 6; }
+.col-7 { grid-column: span 7; }
+.col-8 { grid-column: span 8; }
+.col-9 { grid-column: span 9; }
+.col-10 { grid-column: span 10; }
+.col-11 { grid-column: span 11; }
+.col-12 { grid-column: span 12; }
+
+/* =========================================================
+   9. Breakpoints (mobile first)
+   Base: até 575px - celulares
+   ========================================================= */
+
+/* 1) sm - celulares grandes (576px ou mais) */
+@media (min-width: 576px) {
+  .col-sm-1 { grid-column: span 1; }
+  .col-sm-2 { grid-column: span 2; }
+  .col-sm-3 { grid-column: span 3; }
+  .col-sm-4 { grid-column: span 4; }
+  .col-sm-5 { grid-column: span 5; }
+  .col-sm-6 { grid-column: span 6; }
+  .col-sm-7 { grid-column: span 7; }
+  .col-sm-8 { grid-column: span 8; }
+  .col-sm-9 { grid-column: span 9; }
+  .col-sm-10 { grid-column: span 10; }
+  .col-sm-11 { grid-column: span 11; }
+  .col-sm-12 { grid-column: span 12; }
+
+  :root {
+    --container-padding: var(--espaco-4);
+  }
+
+  .toast-area {
+    left: auto;
+    width: 24rem;
+  }
+}
+
+/* 2) md - tablets (768px ou mais) */
+@media (min-width: 768px) {
+  .col-md-1 { grid-column: span 1; }
+  .col-md-2 { grid-column: span 2; }
+  .col-md-3 { grid-column: span 3; }
+  .col-md-4 { grid-column: span 4; }
+  .col-md-5 { grid-column: span 5; }
+  .col-md-6 { grid-column: span 6; }
+  .col-md-7 { grid-column: span 7; }
+  .col-md-8 { grid-column: span 8; }
+  .col-md-9 { grid-column: span 9; }
+  .col-md-10 { grid-column: span 10; }
+  .col-md-11 { grid-column: span 11; }
+  .col-md-12 { grid-column: span 12; }
+
+  :root {
+    --grid-gap: var(--espaco-4);
+  }
+
+  header {
+    padding: var(--espaco-3) var(--espaco-5);
+  }
+
+  .barra-acessibilidade {
+    padding-inline: var(--espaco-5);
+  }
+
+  .marca img {
+    width: 72px;
+    height: 72px;
+  }
+
+  .marca h1,
+  .marca .nome-ong {
+    font-size: var(--texto-xl);
+  }
+
+  /* Menu horizontal: o hambúrguer some e a lista volta a aparecer */
+  nav {
+    flex: 0 1 auto;
+  }
+
+  .js .menu-toggle {
+    display: none;
+  }
+
+  .menu-lista,
+  .js .menu-lista {
+    flex-direction: row;
+    gap: var(--espaco-2);
+    max-height: none;
+    overflow: visible;
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .menu-lista > li:first-child {
+    margin-top: 0;
+  }
+
+  .menu-lista > li > a {
+    padding: var(--espaco-1) var(--espaco-3);
+    border-radius: var(--raio-pill);
+  }
+
+  /* ---------- Dropdown ---------- */
+  .tem-submenu {
+    position: relative;
+  }
+
+  /* Seta decorativa desenhada com bordas */
+  .tem-submenu > a::after {
+    content: "";
+    display: inline-block;
+    width: 0.4em;
+    height: 0.4em;
+    margin-left: 0.5em;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: translateY(-0.2em) rotate(45deg);
+    transition: transform 0.2s ease;
+  }
+
+  .tem-submenu:hover > a::after,
+  .tem-submenu:focus-within > a::after {
+    transform: translateY(0.05em) rotate(-135deg);
+  }
+
+  /* Submenu oculto por padrão */
+  .submenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 20;
+    min-width: 15rem;
+    padding: var(--espaco-2);
+    background: var(--cor-branco);
+    border-radius: var(--raio-md);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-0.5rem);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  }
+
+  /* Aparece com o mouse (:hover) ou com o teclado (:focus-within) */
+  .tem-submenu:hover > .submenu,
+  .tem-submenu:focus-within > .submenu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .submenu a {
+    color: var(--cor-primaria-escura);
+  }
+
+  .submenu a:hover,
+  .submenu a:focus-visible {
+    background: var(--cor-primaria-clara);
+    color: var(--cor-primaria-escura);
+  }
+
+  .submenu a:focus-visible {
+    outline-color: var(--cor-foco);
+  }
+}
+
+/* 3) lg - notebooks (992px ou mais) */
+@media (min-width: 992px) {
+  .col-lg-1 { grid-column: span 1; }
+  .col-lg-2 { grid-column: span 2; }
+  .col-lg-3 { grid-column: span 3; }
+  .col-lg-4 { grid-column: span 4; }
+  .col-lg-5 { grid-column: span 5; }
+  .col-lg-6 { grid-column: span 6; }
+  .col-lg-7 { grid-column: span 7; }
+  .col-lg-8 { grid-column: span 8; }
+  .col-lg-9 { grid-column: span 9; }
+  .col-lg-10 { grid-column: span 10; }
+  .col-lg-11 { grid-column: span 11; }
+  .col-lg-12 { grid-column: span 12; }
+
+  :root {
+    --container-padding: var(--espaco-5);
+  }
+
+  #quem-somos {
+    align-items: center;
+  }
+}
+
+/* 4) xl - desktops (1200px ou mais) */
+@media (min-width: 1200px) {
+  .col-xl-1 { grid-column: span 1; }
+  .col-xl-2 { grid-column: span 2; }
+  .col-xl-3 { grid-column: span 3; }
+  .col-xl-4 { grid-column: span 4; }
+  .col-xl-5 { grid-column: span 5; }
+  .col-xl-6 { grid-column: span 6; }
+  .col-xl-7 { grid-column: span 7; }
+  .col-xl-8 { grid-column: span 8; }
+  .col-xl-9 { grid-column: span 9; }
+  .col-xl-10 { grid-column: span 10; }
+  .col-xl-11 { grid-column: span 11; }
+  .col-xl-12 { grid-column: span 12; }
+
+  :root {
+    --largura-max: 1140px;
+  }
+}
+
+/* 5) xxl - telas panorâmicas (1400px ou mais) */
+@media (min-width: 1400px) {
+  .col-xxl-1 { grid-column: span 1; }
+  .col-xxl-2 { grid-column: span 2; }
+  .col-xxl-3 { grid-column: span 3; }
+  .col-xxl-4 { grid-column: span 4; }
+  .col-xxl-5 { grid-column: span 5; }
+  .col-xxl-6 { grid-column: span 6; }
+  .col-xxl-7 { grid-column: span 7; }
+  .col-xxl-8 { grid-column: span 8; }
+  .col-xxl-9 { grid-column: span 9; }
+  .col-xxl-10 { grid-column: span 10; }
+  .col-xxl-11 { grid-column: span 11; }
+  .col-xxl-12 { grid-column: span 12; }
+
+  :root {
+    --largura-max: 1320px;
+    --grid-gap: var(--espaco-5);
+  }
+
+  header,
+  .barra-acessibilidade {
+    padding-inline: calc((100% - var(--largura-max)) / 2);
+  }
+}
+
+/* =========================================================
+   10. Preferência por menos movimento (acessibilidade)
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
