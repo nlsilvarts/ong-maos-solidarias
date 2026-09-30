@@ -48,6 +48,22 @@ export default {
       })}
 
       ${alerta({
+        tipo: "info",
+        titulo: "Rascunho recuperado",
+        texto: "Preenchemos os campos com o rascunho salvo neste navegador.",
+        id: "aviso-rascunho",
+        oculto: true,
+        acao: { texto: "Descartar rascunho", id: "botao-descartar-rascunho" }
+      })}
+
+      <section id="historico-cadastros" class="historico" aria-labelledby="historico-titulo" hidden>
+        <h2 id="historico-titulo">Cadastros enviados neste navegador</h2>
+        <p class="dica">Enquanto não há um servidor, guardamos aqui apenas o primeiro nome, a forma de participação e a data de cada envio.</p>
+        <ul id="historico-lista"></ul>
+        <button type="button" class="botao botao-pequeno botao-secundario" id="botao-apagar-historico">Apagar histórico</button>
+      </section>
+
+      ${alerta({
         tipo: "erro",
         titulo: "Não foi possível enviar o cadastro",
         texto: "Corrija os campos destacados em vermelho e tente novamente.",
