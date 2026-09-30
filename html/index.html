@@ -8,12 +8,31 @@
   <link rel="icon" href="../imagens/logo.png" type="image/png">
   <link rel="stylesheet" href="../css/reset.css">
   <link rel="stylesheet" href="../css/style.css">
-  <script>document.documentElement.classList.add("js");</script>
+  <script>
+    // Roda antes da primeira exibição: indica ao CSS que o JavaScript está ativo
+    // e aplica a preferência de texto maior salva no localStorage (ver preferencias.js)
+    document.documentElement.classList.add("js");
+    try {
+      var preferencias = JSON.parse(localStorage.getItem("ong-maos-solidarias:preferencias"));
+      if (preferencias && preferencias.textoGrande === true) {
+        document.documentElement.classList.add("texto-grande");
+      }
+    } catch (erro) {
+      // Sem acesso ao localStorage: mantém o tamanho padrão
+    }
+  </script>
   <script type="module" src="../js/main.js"></script>
 </head>
 <body>
 
   <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
+
+  <!-- Barra de acessibilidade: a preferência fica salva no localStorage -->
+  <div class="barra-acessibilidade">
+    <button type="button" id="botao-texto-grande" class="botao-texto" aria-pressed="false">
+      <span aria-hidden="true">A+</span> Texto maior
+    </button>
+  </div>
 
   <!-- Cabeçalho e menu: ficam fixos em todas as páginas da SPA -->
   <header>

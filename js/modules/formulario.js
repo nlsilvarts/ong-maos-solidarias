@@ -8,8 +8,13 @@
  *   o envio é bloqueado e um resumo com links para os campos aparece no topo.
  * - O resultado é mostrado com classes CSS (.campo-valido / .campo-invalido),
  *   uma mensagem injetada abaixo do campo e atributos de acessibilidade.
+ * - Persistência (localStorage): o rascunho é salvo durante a digitação e
+ *   restaurado ao abrir a página; cada envio válido entra no histórico.
  */
 import { REGRAS } from "./validacao.js";
+import { salvarRascunho, restaurarRascunho, descartarRascunho } from "./rascunho.js";
+import { registrarEnvio, mostrarHistorico, apagarHistorico, formatarDataHora } from "./historico.js";
+import { mostrarToast } from "./feedback.js";
 
 export function iniciarFormulario(formulario) {
   const botaoEnviar = formulario.querySelector('button[type="submit"]');
@@ -17,7 +22,16 @@ export function iniciarFormulario(formulario) {
   const alertaErro = document.getElementById("alerta-erro");
   const textoErro = document.getElementById("alerta-erro-texto");
   const modal = document.getElementById("modal-cadastro");
+  const avisoRascunho = document.getElementById("aviso-rascunho");
+  const textoRascunho = document.getElementById("aviso-rascunho-texto");
   const tocados = new Set(); // campos que o usuário já preencheu ou tentou enviar
+  let temporizadorRascunho = null;
+
+  // Grava o rascunho 400 ms depois da última digitação (evita gravar a cada tecla)
+  const agendarRascunho = () => {
+    clearTimeout(temporizadorRascunho);
+    temporizadorRascunho = setTimeout(() => salvarRascunho(formulario), 400);
+  };
 
   const atualizarBotaoEnviar = () => {
     botaoEnviar.disabled = !aceite.checked;
@@ -154,12 +168,13 @@ export function iniciarFormulario(formulario) {
     }
   });
 
-  // Durante a digitação: atualiza em tempo real os campos já verificados
+  // Durante a digitação: atualiza em tempo real os campos já verificados e agenda o rascunho
   formulario.addEventListener("input", (evento) => {
     const { name } = evento.target;
     if (REGRAS[name] && tocados.has(name)) {
       verificar(name);
     }
+    agendarRascunho();
   });
 
   // Seleções (estado, rádios, data e aceite) são verificadas na hora
@@ -188,16 +203,21 @@ export function iniciarFormulario(formulario) {
       return;
     }
 
-    // Sem back-end, o envio é simulado: o modal confirma e o formulário é limpo
+    // Sem back-end, o envio é simulado: registra no histórico, confirma no modal e limpa o formulário
     alertaErro.hidden = true;
     const primeiroNome = lerValor("nome").split(" ")[0];
+    registrarEnvio({ primeiroNome, participacao: lerValor("participacao") });
+    mostrarHistorico();
     document.getElementById("modal-cadastro-nome").textContent = primeiroNome;
     modal.showModal();
     formulario.reset();
   });
 
-  // Limpar campos: remove classes, mensagens e o resumo
+  // Limpar campos: remove classes, mensagens, o resumo e o rascunho salvo
   formulario.addEventListener("reset", () => {
+    clearTimeout(temporizadorRascunho);
+    descartarRascunho();
+    avisoRascunho.hidden = true;
     setTimeout(() => {
       tocados.clear();
       Object.keys(REGRAS).forEach((nome) => marcar(nome, "neutro"));
@@ -205,6 +225,34 @@ export function iniciarFormulario(formulario) {
       atualizarBotaoEnviar();
     }, 0);
   });
+
+  document.getElementById("botao-descartar-rascunho").addEventListener("click", () => {
+    formulario.reset();
+    mostrarToast("Rascunho descartado.", "info");
+  });
+
+  document.getElementById("botao-apagar-historico").addEventListener("click", () => {
+    apagarHistorico();
+    mostrarHistorico();
+    mostrarToast("Histórico de cadastros apagado.", "info");
+  });
+
+  /* ---------- Restauração ao abrir a página ---------- */
+
+  mostrarHistorico();
+
+  const recuperado = restaurarRascunho(formulario);
+  if (recuperado) {
+    textoRascunho.textContent = `Preenchemos os campos com o rascunho salvo em ${formatarDataHora(recuperado.salvoEm)}. Por segurança, o CPF e o aceite não são guardados.`;
+    avisoRascunho.hidden = false;
+    // Os campos restaurados já aparecem verificados (verde ou vermelho)
+    recuperado.restaurados.forEach((nome) => {
+      if (REGRAS[nome]) {
+        tocados.add(nome);
+        verificar(nome);
+      }
+    });
+  }
 
   atualizarBotaoEnviar();
 }
