@@ -4,8 +4,10 @@
  */
 import { iniciarMenu } from "./modules/menu.js";
 import { iniciarFeedback } from "./modules/feedback.js";
+import { iniciarMascaras } from "./modules/mascaras.js";
 import { iniciarRoteador } from "./modules/router.js";
 
 iniciarMenu();
 iniciarFeedback();
+iniciarMascaras();
 iniciarRoteador(document.getElementById("conteudo"));
