@@ -4,6 +4,12 @@ Todas as mudanças importantes do projeto são registradas aqui.
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e as versões seguem o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.0.1] - 2026-09-30
+
+### Corrigido
+- Ao fechar o modal de confirmação do cadastro, o foco ia para o fim da página e o usuário de
+  teclado era levado ao rodapé. Agora o foco vai para o título do histórico de envios.
+
 ## [1.0.0] - 2026-09-30
 
 ### Adicionado
@@ -23,4 +29,5 @@ e as versões seguem o [Versionamento Semântico](https://semver.org/lang/pt-BR/
 - Formulário dividido em módulos com responsabilidade única (`campos.js`, `resumo-erros.js`
   e o controlador `formulario.js`).
 
+[1.0.1]: https://github.com/SEU-USUARIO/ong-maos-solidarias/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/SEU-USUARIO/ong-maos-solidarias/releases/tag/v1.0.0
