@@ -1,6 +1,6 @@
 {
   "name": "ong-maos-solidarias",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Site da ONG Mãos Solidárias (SPA em HTML, CSS e JavaScript puro).",
   "scripts": {
