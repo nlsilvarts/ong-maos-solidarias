@@ -106,6 +106,15 @@ export function iniciarFormulario(formulario) {
     registrarEnvio({ primeiroNome, participacao: lerValor(formulario, "participacao") });
     mostrarHistorico();
     document.getElementById("modal-cadastro-nome").textContent = primeiroNome;
+
+    // Ao fechar, o navegador devolveria o foco ao botão "Enviar", que fica desabilitado após
+    // o envio, e o foco se perderia. Ele vai para o título do histórico, que recebeu o novo envio.
+    modal.addEventListener("close", () => {
+      const tituloHistorico = document.getElementById("historico-titulo");
+      tituloHistorico.setAttribute("tabindex", "-1");
+      tituloHistorico.focus();
+    }, { once: true });
+
     modal.showModal();
     formulario.reset();
   });
