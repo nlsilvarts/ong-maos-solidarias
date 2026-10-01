@@ -259,6 +259,12 @@ header {
   min-width: 0;
 }
 
+/* O <picture> do logotipo não encolhe ao lado do nome da ONG: sem isso, em telas
+   estreitas, o max-width: 100% do reset.css achatava a imagem (30 × 56 px a 390 px) */
+.marca picture {
+  flex: none;
+}
+
 .marca img {
   width: 56px;
   height: 56px;

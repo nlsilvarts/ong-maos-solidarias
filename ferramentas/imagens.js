@@ -15,6 +15,9 @@
  *     256 cores e WebP sem perdas feito a partir dessa paleta. O AVIF não
  *     compensa nesse caso, porque ficava maior que o WebP.
  *
+ * A imagem que muda muito de tamanho conforme a tela também ganha versões
+ * mais estreitas (LARGURAS_MENORES), usadas pelo srcset/sizes do <picture>.
+ *
  * O script sempre parte dos originais, então pode ser rodado de novo sem
  * perder qualidade. As versões geradas são versionadas no Git, para o site
  * funcionar sem instalar nada (o build de produção só as copia).
@@ -28,19 +31,30 @@ const RAIZ = fileURLToPath(new URL("..", import.meta.url));
 export const PASTA_ORIGINAIS = join(RAIZ, "imagens", "originais");
 export const PASTA_IMAGENS = join(RAIZ, "imagens");
 
-const paleta = (arquivo) => sharp(arquivo).png({ palette: true, quality: 90, effort: 10, compressionLevel: 9 });
+/* Abre o original, reduzido para a largura pedida (sem largura, no tamanho original) */
+const abrir = (arquivo, largura) => (largura ? sharp(arquivo).resize({ width: largura }) : sharp(arquivo));
+const paleta = (arquivo, largura) => abrir(arquivo, largura).png({ palette: true, quality: 90, effort: 10, compressionLevel: 9 });
 
 /* Versões geradas para cada tipo de original: extensão do arquivo e conversão */
 export const VERSOES = {
   ".jpg": [
-    { formato: "jpg", gerar: (arquivo) => sharp(arquivo).jpeg({ quality: 75, mozjpeg: true }).toBuffer() },
-    { formato: "webp", gerar: (arquivo) => sharp(arquivo).webp({ quality: 75, effort: 6 }).toBuffer() },
-    { formato: "avif", gerar: (arquivo) => sharp(arquivo).avif({ quality: 50, effort: 6 }).toBuffer() }
+    { formato: "jpg", gerar: (arquivo, largura) => abrir(arquivo, largura).jpeg({ quality: 75, mozjpeg: true }).toBuffer() },
+    { formato: "webp", gerar: (arquivo, largura) => abrir(arquivo, largura).webp({ quality: 75, effort: 6 }).toBuffer() },
+    { formato: "avif", gerar: (arquivo, largura) => abrir(arquivo, largura).avif({ quality: 50, effort: 6 }).toBuffer() }
   ],
   ".png": [
-    { formato: "png", gerar: (arquivo) => paleta(arquivo).toBuffer() },
-    { formato: "webp", gerar: async (arquivo) => sharp(await paleta(arquivo).toBuffer()).webp({ lossless: true, effort: 6 }).toBuffer() }
+    { formato: "png", gerar: (arquivo, largura) => paleta(arquivo, largura).toBuffer() },
+    { formato: "webp", gerar: async (arquivo, largura) => sharp(await paleta(arquivo, largura).toBuffer()).webp({ lossless: true, effort: 6 }).toBuffer() }
   ]
+};
+
+/* Larguras menores, além do tamanho original, para a imagem que muda muito de tamanho
+   conforme a tela. A ilustração da página inicial (800 px) ocupa de 288 a 800 px de
+   largura: num celular com tela comum (1x), a versão de 400 px já fica nítida. Os
+   cartões (400 px) e o logotipo (120 px) não precisam: nunca aparecem maiores que o
+   original, e o logotipo, exibido com 56 a 72 px, já tem resolução para telas 2x */
+export const LARGURAS_MENORES = {
+  voluntarios: [400]
 };
 
 /* Originais encontrados em imagens/originais/: [{ nome, extensao, caminho }] */
@@ -66,13 +80,17 @@ async function otimizar() {
   const linhas = [];
   for (const original of await listarOriginais()) {
     const tamanhoOriginal = (await stat(original.caminho)).size;
-    const versoes = [];
-    for (const versao of VERSOES[original.extensao]) {
-      const conteudo = await versao.gerar(original.caminho);
-      await writeFile(join(PASTA_IMAGENS, `${original.nome}.${versao.formato}`), conteudo);
-      versoes.push(`${versao.formato.toUpperCase()} ${kb(conteudo.length)} (-${reducao(tamanhoOriginal, conteudo.length)})`);
+    for (const largura of [undefined, ...(LARGURAS_MENORES[original.nome] ?? [])]) {
+      const sufixo = largura ? `-${largura}` : "";
+      const versoes = [];
+      for (const versao of VERSOES[original.extensao]) {
+        const conteudo = await versao.gerar(original.caminho, largura);
+        await writeFile(join(PASTA_IMAGENS, `${original.nome}${sufixo}.${versao.formato}`), conteudo);
+        versoes.push(`${versao.formato.toUpperCase()} ${kb(conteudo.length)} (-${reducao(tamanhoOriginal, conteudo.length)})`);
+      }
+      const rotulo = largura ? `  ${original.nome}${sufixo} (${largura} px)` : `${original.nome}${original.extensao}`;
+      linhas.push(`  ${rotulo.padEnd(26)} ${(largura ? "" : kb(tamanhoOriginal)).padStart(8)}  →  ${versoes.join("  ")}`);
     }
-    linhas.push(`  ${`${original.nome}${original.extensao}`.padEnd(26)} ${kb(tamanhoOriginal).padStart(8)}  →  ${versoes.join("  ")}`);
   }
   console.log("Imagens otimizadas (original → versões em imagens/):");
   console.log(linhas.join("\n"));

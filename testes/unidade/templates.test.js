@@ -59,6 +59,19 @@ describe("imagem()", () => {
     assert.match(imagem(foto, { carregamento: "eager" }), /loading="eager" fetchpriority="high"/);
     assert.doesNotMatch(imagem(foto), /fetchpriority/);
   });
+
+  it("sem versões menores, usa um só arquivo por formato, sem sizes", () => {
+    assert.doesNotMatch(imagem(foto), /\d+w|sizes=/);
+  });
+
+  it("com versões menores, lista as larguras (w) e repete o sizes nos três formatos", () => {
+    const html = imagem({ ...foto, menores: [400], tamanhos: "(min-width: 992px) 38vw, 100vw" });
+    for (const formato of ["avif", "webp", "jpg"]) {
+      assert.match(html, new RegExp(`srcset="\\.\\./imagens/voluntarios-400\\.${formato} 400w, \\.\\./imagens/voluntarios\\.${formato} 800w"`));
+    }
+    assert.equal(html.match(/sizes="\(min-width: 992px\) 38vw, 100vw"/g).length, 3);
+    assert.match(html, /<img src="\.\.\/imagens\/voluntarios\.jpg"/);
+  });
 });
 
 describe("listaBadges() e cartaoCampanha()", () => {

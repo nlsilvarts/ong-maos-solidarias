@@ -9,7 +9,8 @@ import assert from "node:assert/strict";
 import { stat } from "node:fs/promises";
 import { join } from "node:path";
 import sharp from "sharp";
-import { VERSOES, PASTA_IMAGENS, listarOriginais } from "../../ferramentas/imagens.js";
+import { VERSOES, LARGURAS_MENORES, PASTA_IMAGENS, listarOriginais } from "../../ferramentas/imagens.js";
+import { fotoVoluntarios } from "../../js/modules/paginas/inicio.js";
 
 const originais = await listarOriginais();
 
@@ -33,4 +34,18 @@ describe("imagens otimizadas", () => {
       }
     });
   }
+
+  it("a imagem principal tem as versões de 400 px em JPG, WebP e AVIF, na proporção do original e menores que as de 800 px", async () => {
+    assert.deepEqual(LARGURAS_MENORES, { voluntarios: [400] });
+    for (const { formato } of VERSOES[".jpg"]) {
+      const menor = join(PASTA_IMAGENS, `voluntarios-400.${formato}`);
+      const { width, height } = await sharp(menor).metadata();
+      assert.deepEqual([width, height], [400, 225], `${menor}: dimensões`);
+      assert.ok((await stat(menor)).size < (await stat(join(PASTA_IMAGENS, `voluntarios.${formato}`))).size, `${menor}: não ficou menor`);
+    }
+  });
+
+  it("a página inicial só pede as larguras que o script gera", () => {
+    assert.deepEqual(fotoVoluntarios.menores, LARGURAS_MENORES[fotoVoluntarios.arquivo]);
+  });
 });

@@ -28,6 +28,25 @@ test("só a imagem do topo da página inicial é baixada de imediato, com priori
   await expect(page.locator("main img[loading='lazy']")).not.toHaveCount(0);
 });
 
+/* A imagem principal tem versões de 400 e 800 px (srcset + sizes): o navegador escolhe
+   pela largura que ela ocupa na tela e pela densidade de pixels */
+const casos = [
+  { tela: "celular 390 px, densidade 1x", viewport: { width: 390, height: 844 }, densidade: 1, arquivo: "voluntarios-400.avif" },
+  { tela: "celular 390 px, densidade 2x", viewport: { width: 390, height: 844 }, densidade: 2, arquivo: "voluntarios.avif" },
+  { tela: "notebook 1280 px, densidade 1x", viewport: { width: 1280, height: 800 }, densidade: 1, arquivo: "voluntarios.avif" }
+];
+for (const { tela, viewport, densidade, arquivo } of casos) {
+  test.describe(`Imagem principal em ${tela}`, () => {
+    test.use({ viewport, deviceScaleFactor: densidade });
+
+    test(`baixa ${arquivo}`, async ({ page }) => {
+      await page.goto(PAGINA);
+      const imagem = page.locator("main img[fetchpriority='high']");
+      await expect.poll(() => imagem.evaluate((img) => img.complete && img.currentSrc.split("/").pop())).toBe(arquivo);
+    });
+  });
+}
+
 test.describe("Build de produção @producao", () => {
   test("HTML, CSS e JS minificados, com hash do conteúdo no nome dos arquivos", async ({ page, request }) => {
     await page.goto(PAGINA);

@@ -158,6 +158,7 @@ O `ferramentas/imagens.js` usa o **sharp** para gerar, a partir dos originais de
 | `projeto-educacao.jpg` | 9,5 KB | 7,4 KB (−21%) | 3,0 KB (−68%) | 2,2 KB (−76%) |
 | `projeto-meio-ambiente.jpg` | 8,1 KB | 6,2 KB (−24%) | 3,4 KB (−59%) | 2,8 KB (−66%) |
 | `voluntarios.jpg` | 14,6 KB | 11,0 KB (−25%) | 5,2 KB (−64%) | 3,5 KB (−76%) |
+| `voluntarios-400` (400 px) | — | 5,0 KB | 2,4 KB | 1,9 KB |
 
 - Ilustrações: JPG progressivo com o codificador mozjpeg (qualidade 75), WebP (qualidade 75) e AVIF
   (qualidade 50). O `<picture>` oferece o AVIF, depois o WebP, e deixa o JPG como alternativa.
@@ -165,6 +166,21 @@ O `ferramentas/imagens.js` usa o **sharp** para gerar, a partir dos originais de
   maior que o WebP e não é usado.
 - As imagens têm `width` e `height` (o espaço fica reservado e o layout não salta),
   `loading="lazy"` fora do topo da página e `fetchpriority="high"` na imagem principal do início.
+
+**Resolução conforme a tela.** As imagens são exportadas no maior tamanho em que aparecem, medido
+no layout de 320 a 1920 px de tela, e o CSS (`max-width: 100%; height: auto`) as reduz em telas
+menores:
+
+| Imagem | Largura na tela | Versões |
+|---|---|---|
+| Ilustração do início | de 288 px (celular) a 800 px (tablet) | 400 e 800 px, com `srcset` e `sizes` |
+| Cartões dos projetos | de 224 a 400 px | 400 px |
+| Logotipo | 56 px (celular) e 72 px (computador) | 120 px, nítido em telas 2x |
+
+Na ilustração do início, o atributo `sizes` informa a largura que ela ocupa em cada faixa de tela,
+e o navegador escolhe pelo `srcset`, considerando a densidade de pixels: um celular com tela 1x
+baixa a versão de 400 px (1,9 KB em AVIF, em vez de 3,5 KB), e telas 2x ou maiores recebem a de
+800 px. A lista de larguras fica em `LARGURAS_MENORES`, no `ferramentas/imagens.js`.
 
 As versões geradas são versionadas, e o build só as copia. Rode `npm run imagens` ao trocar um
 original.
@@ -203,7 +219,7 @@ código-fonte, e `producao`, com a pasta `dist/` servida em `/ong-maos-solidaria
 GitHub Pages, o que garante que nenhum endereço dependa da raiz do domínio.
 
 - `navegacao.spec.js`: rotas, título da aba, foco, Voltar e Avançar, página não encontrada,
-  link "Pular para o conteúdo" e menu no celular;
+  link "Pular para o conteúdo", menu no celular e logotipo sem distorção em telas estreitas;
 - `cadastro.spec.js`: máscaras, verificação em tempo real, resumo de erros e envio. Inclui o teste
   de regressão do defeito corrigido na versão 1.0.1 (foco ao fechar o modal);
 - `persistencia.spec.js`: preferência de texto, rascunho sem CPF e dados corrompidos no localStorage;
@@ -212,9 +228,10 @@ GitHub Pages, o que garante que nenhum endereço dependa da raiz do domínio.
 - `acessibilidade.spec.js`: auditoria da WCAG 2.1 AA com o axe-core em todas as rotas e estados
   (erros, modal, menu do celular, alto contraste), marcos, ordem do Tab e contorno de foco em cada
   parada, submenu pelo teclado, foco ao fechar alertas, nomes acessíveis e preferências visuais;
-- `desempenho.spec.js`: imagens em AVIF com `width` e `height`, prioridade da imagem principal e,
-  só no build, arquivos minificados com hash no nome e o orçamento de tamanho (JS abaixo de 50 KB,
-  CSS abaixo de 30 KB e primeira visita abaixo de 100 KB).
+- `desempenho.spec.js`: imagens em AVIF com `width` e `height`, prioridade da imagem principal,
+  versão da imagem principal escolhida pelo `srcset` (celular 1x e 2x e notebook) e, só no build,
+  arquivos minificados com hash no nome e o orçamento de tamanho (JS abaixo de 50 KB, CSS abaixo
+  de 30 KB e primeira visita abaixo de 100 KB).
 
 Comandos úteis:
 
@@ -481,6 +498,7 @@ As mensagens de commit seguem o Conventional Commits, no formato `tipo(escopo): 
 | `feat` | Nova funcionalidade | `feat(projetos): adiciona gráfico de arrecadação das campanhas` |
 | `fix` | Correção de defeito | `fix(cadastro): devolve o foco ao título do histórico ao fechar o modal` |
 | `refactor` | Mudança interna sem alterar o comportamento | `refactor(cadastro): separa estado dos campos e resumo de erros em módulos` |
+| `perf` | Melhoria de desempenho | `perf(imagens): imagem principal responsiva, com versões de 400 e 800 px escolhidas por srcset e sizes` |
 | `test` | Testes automatizados | `test: adiciona testes de ponta a ponta com Playwright` |
 | `docs` | Documentação | `docs: documenta estrutura, execução, módulos e versionamento no README` |
 | `build` | Dependências, empacotamento e ferramentas | `build: empacota o Chart.js 4.5.1 com esbuild` |
