@@ -10,7 +10,8 @@
   "scripts": {
     "start": "node ferramentas/servidor.js",
     "build": "npm run build:vendor",
-    "build:vendor": "esbuild ferramentas/chart-entrada.js --bundle --format=esm --minify --legal-comments=eof --outfile=js/vendor/chart.esm.js"
+    "build:vendor": "esbuild ferramentas/chart-entrada.js --bundle --format=esm --minify --legal-comments=eof --outfile=js/vendor/chart.esm.js",
+    "test": "node --test"
   },
   "devDependencies": {
     "chart.js": "4.5.1",
