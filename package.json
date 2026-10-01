@@ -12,7 +12,8 @@
     "build": "npm run build:vendor",
     "build:vendor": "esbuild ferramentas/chart-entrada.js --bundle --format=esm --minify --legal-comments=eof --outfile=js/vendor/chart.esm.js",
     "test": "node --test",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "contraste": "node ferramentas/contraste.js"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

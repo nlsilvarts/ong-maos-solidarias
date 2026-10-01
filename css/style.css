@@ -1,6 +1,8 @@
 /* =========================================================
    ONG Mãos Solidárias - Folha de estilo
    1. Design System (variáveis customizadas)
+   O contraste de cada combinação de cores usada no site é conferido
+   por "npm run contraste" (ferramentas/contraste.js).
    ========================================================= */
 
 :root {
@@ -1413,7 +1415,8 @@ footer p {
    escolha salva, pela configuração do sistema (prefers-contrast: more).
    Fundo preto, texto branco e amarelo nos links, botões e foco: contrastes de
    21:1 e 19,6:1, acima dos 7:1 exigidos no nível AAA. As cores de estado
-   (sucesso, erro, aviso e informação) ficam entre 10:1 e 15:1 sobre o preto.
+   (sucesso, erro, aviso e informação) ficam entre 10:1 e 15:1 sobre o preto
+   (valores conferidos por "npm run contraste").
    ========================================================= */
 
 html.alto-contraste {
