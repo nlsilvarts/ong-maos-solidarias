@@ -5,7 +5,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-const PAGINA = "/html/index.html";
+import { PAGINA, prepararConsultasAoChart } from "./apoio/site.js";
 const WCAG_21_AA = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 
 /* Roda o axe na página como está e lista as violações de forma legível */
@@ -170,8 +170,8 @@ test.describe("Semântica, teclado e WAI-ARIA", () => {
 test.describe("Alto contraste", () => {
   const botaoContraste = (page) => page.getByRole("button", { name: "Alto contraste" });
   const corDasBarras = (page) => page.evaluate(async () => {
-    const { Chart } = await import("/js/vendor/chart.esm.js");
-    return Chart.getChart("grafico-campanhas").data.datasets[0].backgroundColor;
+    const modulo = await window.moduloDoChart();
+    return modulo?.Chart.getChart("grafico-campanhas")?.data.datasets[0].backgroundColor ?? null;
   });
 
   for (const rota of ["inicio", "projetos", "componentes"]) {
@@ -221,6 +221,7 @@ test.describe("Alto contraste", () => {
   });
 
   test("o gráfico troca as cores das barras junto com o tema", async ({ page }) => {
+    await prepararConsultasAoChart(page);
     await page.goto(`${PAGINA}#/projetos`);
     await expect.poll(() => corDasBarras(page)).toBe("#1f8a5a");
     await botaoContraste(page).click();

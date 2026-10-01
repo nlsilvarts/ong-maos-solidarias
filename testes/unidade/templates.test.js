@@ -5,7 +5,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
-import { escapar, numero, alerta, listaBadges, cartaoCampanha } from "../../js/modules/templates.js";
+import { escapar, numero, alerta, listaBadges, cartaoCampanha, imagem } from "../../js/modules/templates.js";
 import { campanhas, projetos, percentualArrecadado } from "../../js/modules/dados.js";
 
 describe("escapar()", () => {
@@ -44,6 +44,23 @@ describe("alerta()", () => {
   });
 });
 
+describe("imagem()", () => {
+  const foto = { arquivo: "voluntarios", alt: "Voluntários", largura: 800, altura: 450 };
+
+  it("oferece AVIF, depois WebP, e deixa o JPG como alternativa", () => {
+    const html = imagem(foto);
+    const ordem = ["voluntarios.avif", "voluntarios.webp", "voluntarios.jpg"].map((arquivo) => html.indexOf(arquivo));
+    assert.ok(ordem.every((posicao, i) => posicao > (ordem[i - 1] ?? -1)), `ordem dos formatos: ${ordem}`);
+    assert.match(html, /type="image\/avif"/);
+    assert.match(html, /width="800" height="450" loading="lazy">/);
+  });
+
+  it("dá prioridade alta só à imagem carregada de imediato (eager)", () => {
+    assert.match(imagem(foto, { carregamento: "eager" }), /loading="eager" fetchpriority="high"/);
+    assert.doesNotMatch(imagem(foto), /fetchpriority/);
+  });
+});
+
 describe("listaBadges() e cartaoCampanha()", () => {
   it("lista de badges tem rótulo acessível e textos escapados", () => {
     const html = listaBadges([{ texto: "<script>", tipo: "erro" }], "Situação");
@@ -63,11 +80,11 @@ describe("dados.js", () => {
     assert.equal(percentualArrecadado({ arrecadado: 450, quantidade: 400 }), 100);
   });
 
-  it("toda imagem de projeto tem texto alternativo, dimensões e os arquivos JPG e WebP", () => {
+  it("toda imagem de projeto tem texto alternativo, dimensões e os arquivos JPG, WebP e AVIF", () => {
     for (const { titulo, imagem } of projetos) {
       assert.ok(imagem.alt.length > 10, `${titulo}: texto alternativo curto`);
       assert.ok(imagem.largura > 0 && imagem.altura > 0, `${titulo}: sem dimensões`);
-      for (const formato of ["jpg", "webp"]) {
+      for (const formato of ["jpg", "webp", "avif"]) {
         const arquivo = new URL(`../../imagens/${imagem.arquivo}.${formato}`, import.meta.url);
         assert.ok(existsSync(arquivo), `${titulo}: falta ${imagem.arquivo}.${formato}`);
       }

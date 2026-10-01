@@ -3,7 +3,9 @@
  */
 import { test, expect } from "@playwright/test";
 
-const CADASTRO = "/html/index.html#/cadastro";
+import { PAGINA } from "./apoio/site.js";
+
+const CADASTRO = `${PAGINA}#/cadastro`;
 
 /* Preenche todos os campos obrigatórios com dados válidos */
 async function preencherComDadosValidos(page) {
