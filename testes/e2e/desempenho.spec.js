@@ -47,6 +47,38 @@ for (const { tela, viewport, densidade, arquivo } of casos) {
   });
 }
 
+/* CLS (Cumulative Layout Shift): soma das mudanças de layout que a pessoa vê enquanto a página
+   carrega. O script principal chega com atraso, para a casca da SPA (cabeçalho, "Carregando…" e
+   rodapé) ser desenhada antes do conteúdo, como acontece numa rede lenta */
+const mudancasDeLayout = (page) => page.evaluate(() => new Promise((resolver) => {
+  let soma = 0;
+  new PerformanceObserver((lista) => {
+    for (const mudanca of lista.getEntries()) {
+      if (!mudanca.hadRecentInput) soma += mudanca.value;
+    }
+  }).observe({ type: "layout-shift", buffered: true });
+  setTimeout(() => resolver(soma), 300);
+}));
+
+for (const { tela, viewport } of [
+  { tela: "celular", viewport: { width: 412, height: 823 } },
+  { tela: "computador", viewport: { width: 1350, height: 940 } }
+]) {
+  test.describe(`Estabilidade do layout no ${tela}`, () => {
+    test.use({ viewport });
+
+    test("o rodapé não pula quando o conteúdo aparece (CLS abaixo de 0,1)", async ({ page }) => {
+      await page.route(/\/(js\/main|assets\/main-[A-Z0-9]+)\.js$/, async (rota) => {
+        await new Promise((esperar) => setTimeout(esperar, 400));
+        await rota.continue();
+      });
+      await page.goto(PAGINA);
+      await expect(page.locator("main h1")).toBeVisible();
+      expect(await mudancasDeLayout(page)).toBeLessThan(0.1);
+    });
+  });
+}
+
 test.describe("Build de produção @producao", () => {
   test("HTML, CSS e JS minificados, com hash do conteúdo no nome dos arquivos", async ({ page, request }) => {
     await page.goto(PAGINA);

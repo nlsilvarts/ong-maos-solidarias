@@ -457,8 +457,12 @@ nav {
    4. Conteúdo principal e componentes
    ========================================================= */
 
+/* O conteúdo das páginas é desenhado pelo JavaScript. A altura mínima deixa o rodapé abaixo da
+   área visível desde o primeiro desenho: sem ela, o rodapé aparecia logo abaixo do "Carregando…"
+   e pulava quando o conteúdo chegava (CLS de 0,15 no celular, acima do limite de 0,1) */
 main {
   max-width: var(--largura-max);
+  min-height: 100vh;
   margin: 0 auto;
   padding: var(--espaco-4) var(--container-padding) var(--espaco-6);
 }
