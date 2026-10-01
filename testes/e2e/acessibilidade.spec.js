@@ -228,4 +228,12 @@ test.describe("Alto contraste", () => {
     await botaoContraste(page).click();
     await expect.poll(() => corDasBarras(page)).toBe("#1f8a5a");
   });
+
+  test("com cores forçadas do sistema, o botão ligado continua diferente do desligado", async ({ page }) => {
+    await page.emulateMedia({ forcedColors: "active" });
+    await page.goto(PAGINA);
+    await page.getByRole("button", { name: "Texto maior" }).click();
+    const fundo = (nome) => page.getByRole("button", { name: nome }).evaluate((botao) => getComputedStyle(botao).backgroundColor);
+    expect(await fundo("Texto maior")).not.toBe(await fundo("Alto contraste"));
+  });
 });

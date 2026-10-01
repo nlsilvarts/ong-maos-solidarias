@@ -1611,3 +1611,41 @@ html.alto-contraste .alerta {
 html.alto-contraste .toast {
   border-left: 5px solid var(--fb-cor);
 }
+
+/* =========================================================
+   12. Cores forçadas (Alto Contraste do Windows e similares)
+   O sistema troca as cores da página pelas dele. Estados que
+   dependiam só da cor de fundo passam a usar as cores de
+   destaque do sistema para continuar visíveis.
+   ========================================================= */
+
+@media (forced-colors: active) {
+  .botao-texto[aria-pressed="true"],
+  .menu-lista a[aria-current="page"] {
+    forced-color-adjust: none;
+    color: HighlightText;
+    background-color: Highlight;
+  }
+
+  /* Ícones de status e badges ganham contorno no lugar do fundo colorido */
+  .icone-feedback,
+  .badge {
+    border: 1px solid CanvasText;
+  }
+
+  .botao:disabled {
+    color: GrayText;
+    border: 2px dashed GrayText;
+  }
+
+  /* O gráfico é desenhado no canvas com as cores do Design System:
+     um fundo próprio atrás dele mantém os rótulos legíveis */
+  .grafico-area {
+    forced-color-adjust: none;
+    background-color: #ffffff;
+  }
+
+  html.alto-contraste .grafico-area {
+    background-color: #000000;
+  }
+}
