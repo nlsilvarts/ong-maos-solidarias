@@ -47,8 +47,42 @@ for (const { tela, viewport, densidade, arquivo } of casos) {
   });
 }
 
+/* CLS (Cumulative Layout Shift): soma das mudanças de layout que a pessoa vê enquanto a página
+   carrega. O script principal chega com atraso, para a casca da SPA (cabeçalho, "Carregando…" e
+   rodapé) ser desenhada antes do conteúdo, como acontece numa rede lenta */
+const mudancasDeLayout = (page) => page.evaluate(() => new Promise((resolver) => {
+  let soma = 0;
+  new PerformanceObserver((lista) => {
+    for (const mudanca of lista.getEntries()) {
+      if (!mudanca.hadRecentInput) soma += mudanca.value;
+    }
+  }).observe({ type: "layout-shift", buffered: true });
+  setTimeout(() => resolver(soma), 300);
+}));
+
+for (const { tela, viewport } of [
+  { tela: "celular", viewport: { width: 412, height: 823 } },
+  { tela: "computador", viewport: { width: 1350, height: 940 } }
+]) {
+  test.describe(`Estabilidade do layout no ${tela}`, () => {
+    test.use({ viewport });
+
+    test("o rodapé não pula quando o conteúdo aparece (CLS abaixo de 0,1)", async ({ page }) => {
+      await page.route(/\/(js\/main|assets\/main-[A-Z0-9]+)\.js$/, async (rota) => {
+        await new Promise((esperar) => setTimeout(esperar, 400));
+        await rota.continue();
+      });
+      await page.goto(PAGINA);
+      await expect(page.locator("main h1")).toBeVisible();
+      expect(await mudancasDeLayout(page)).toBeLessThan(0.1);
+    });
+  });
+}
+
 test.describe("Build de produção @producao", () => {
-  test("HTML, CSS e JS minificados, com hash do conteúdo no nome dos arquivos", async ({ page, request }) => {
+  test("HTML, CSS e JS minificados e servidos com gzip, com hash do conteúdo no nome dos arquivos", async ({ page, request }) => {
+    const respostas = new Map();
+    page.on("response", (resposta) => respostas.set(new URL(resposta.url()).pathname.split("/").pop(), resposta));
     await page.goto(PAGINA);
     await expect(page.locator("main h1")).toBeVisible();
 
@@ -56,6 +90,9 @@ test.describe("Build de produção @producao", () => {
     const css = await page.locator('link[rel="stylesheet"]').getAttribute("href");
     expect(js).toMatch(/^assets\/main-[A-Z0-9]{8}\.js$/);
     expect(css).toMatch(/^assets\/estilos-[A-Z0-9]{8}\.css$/);
+    for (const arquivo of [js, css].map((endereco) => endereco.split("/").pop())) {
+      expect(respostas.get(arquivo).headers()["content-encoding"], `${arquivo} com gzip`).toBe("gzip");
+    }
 
     const html = await (await request.get(PAGINA)).text();
     expect(html).not.toContain("\n");
@@ -71,7 +108,7 @@ test.describe("Build de produção @producao", () => {
 
     const recursos = await page.evaluate(() =>
       [...performance.getEntriesByType("navigation"), ...performance.getEntriesByType("resource")]
-        .map((recurso) => ({ nome: recurso.name, bytes: recurso.encodedBodySize })));
+        .map((recurso) => ({ nome: recurso.name, bytes: recurso.decodedBodySize })));   // tamanho sem o gzip
     const soma = (padrao) => recursos.filter((r) => padrao.test(r.nome)).reduce((total, r) => total + r.bytes, 0);
 
     expect(recursos.some((r) => /chart\.esm/.test(r.nome))).toBe(false);   // o Chart.js fica para a página de projetos

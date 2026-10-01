@@ -4,6 +4,19 @@ Todas as mudanças importantes do projeto são registradas aqui.
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e as versões seguem o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.3.2] - 2026-10-01
+
+### Corrigido
+- O rodapé aparecia logo abaixo do "Carregando…" e pulava quando o conteúdo da página chegava
+  (CLS de 0,15 no celular e de 0,76 no computador, segundo o Lighthouse). O `<main>` passou a ter
+  altura mínima de uma tela, e o CLS caiu para 0.
+
+### Alterado
+- O servidor local (`npm start` e `npm run preview`) comprime HTML, CSS e JS com gzip, como o
+  GitHub Pages, para as medições de desempenho refletirem o site publicado.
+- README com a medição do Lighthouse antes e depois da otimização: LCP 22% menor no celular, página
+  52% mais leve e pontuação de desempenho 100.
+
 ## [1.3.1] - 2026-10-01
 
 ### Corrigido
@@ -135,6 +148,7 @@ e as versões seguem o [Versionamento Semântico](https://semver.org/lang/pt-BR/
 - Formulário dividido em módulos com responsabilidade única (`campos.js`, `resumo-erros.js`
   e o controlador `formulario.js`).
 
+[1.3.2]: ../../compare/v1.3.1...v1.3.2
 [1.3.1]: ../../compare/v1.3.0...v1.3.1
 [1.3.0]: ../../compare/v1.2.2...v1.3.0
 [1.2.2]: ../../compare/v1.2.1...v1.2.2
