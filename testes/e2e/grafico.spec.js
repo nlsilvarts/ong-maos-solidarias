@@ -3,16 +3,18 @@
  */
 import { test, expect } from "@playwright/test";
 
-const PAGINA = "/html/index.html";
+import { PAGINA, ARQUIVO_DO_CHART, prepararConsultasAoChart } from "./apoio/site.js";
+
+test.beforeEach(({ page }) => prepararConsultasAoChart(page));
 
 /* As consultas importam o mesmo módulo que a página usa (mesmo endereço, mesma instância do Chart.js) */
 const instancias = (page) => page.evaluate(async () => {
-  const { Chart } = await import("/js/vendor/chart.esm.js");
-  return Object.keys(Chart.instances).length;
+  const modulo = await window.moduloDoChart();
+  return modulo ? Object.keys(modulo.Chart.instances).length : null;
 });
 
 const graficoDasCampanhas = (page) => page.evaluate(async () => {
-  const { Chart } = await import("/js/vendor/chart.esm.js");
+  const { Chart } = await window.moduloDoChart();
   const grafico = Chart.getChart("grafico-campanhas");
   return { valores: grafico.data.datasets[0].data, rotulos: grafico.scales.y.ticks.map((tick) => tick.label) };
 });
@@ -20,7 +22,7 @@ const graficoDasCampanhas = (page) => page.evaluate(async () => {
 test("carrega o Chart.js só na página de projetos e desenha as três campanhas", async ({ page }) => {
   const pedidos = [];
   page.on("request", (pedido) => {
-    if (pedido.url().includes("chart.esm.js")) pedidos.push(pedido.url());
+    if (ARQUIVO_DO_CHART.test(pedido.url())) pedidos.push(pedido.url());
   });
 
   await page.goto(PAGINA);
@@ -48,7 +50,7 @@ test("destrói o gráfico ao sair da página e cria de novo ao voltar", async ({
 });
 
 test("mostra a tabela de dados quando a biblioteca não carrega", async ({ page }) => {
-  await page.route("**/chart.esm.js", (rota) => rota.abort());
+  await page.route(ARQUIVO_DO_CHART, (rota) => rota.abort());
   await page.goto(`${PAGINA}#/projetos`);
 
   await expect(page.locator("#grafico-aviso")).toBeVisible();

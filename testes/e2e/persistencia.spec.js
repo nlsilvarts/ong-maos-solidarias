@@ -4,7 +4,7 @@
  */
 import { test, expect } from "@playwright/test";
 
-const PAGINA = "/html/index.html";
+import { PAGINA } from "./apoio/site.js";
 const PREFIXO = "ong-maos-solidarias:";
 
 const lerChave = (page, chave) => page.evaluate((nome) => localStorage.getItem(nome), PREFIXO + chave);

@@ -3,7 +3,7 @@
  */
 import { test, expect } from "@playwright/test";
 
-const PAGINA = "/html/index.html";
+import { PAGINA } from "./apoio/site.js";
 const TITULOS = {
   inicio: "Bem-vindo à ONG Mãos Solidárias",
   projetos: "Projetos sociais",

@@ -14,7 +14,8 @@
     "build:vendor": "esbuild ferramentas/chart-entrada.js --bundle --format=esm --minify --legal-comments=eof --outfile=js/vendor/chart.esm.js",
     "imagens": "node ferramentas/imagens.js",
     "test": "node --test",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --project=desenvolvimento",
+    "test:e2e:producao": "npm run build && playwright test --project=producao",
     "contraste": "node ferramentas/contraste.js"
   },
   "devDependencies": {
