@@ -29,5 +29,5 @@ e as versões seguem o [Versionamento Semântico](https://semver.org/lang/pt-BR/
 - Formulário dividido em módulos com responsabilidade única (`campos.js`, `resumo-erros.js`
   e o controlador `formulario.js`).
 
-[1.0.1]: https://github.com/SEU-USUARIO/ong-maos-solidarias/compare/v1.0.0...v1.0.1
-[1.0.0]: https://github.com/SEU-USUARIO/ong-maos-solidarias/releases/tag/v1.0.0
+[1.0.1]: ../../compare/v1.0.0...v1.0.1
+[1.0.0]: ../../releases/tag/v1.0.0
