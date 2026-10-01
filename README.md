@@ -13,15 +13,16 @@ recarregar o navegador e sem framework.
 5. [Como executar](#como-executar)
 6. [Build de produção](#build-de-produção)
 7. [Testes](#testes)
-8. [Estrutura de pastas](#estrutura-de-pastas)
-9. [Arquitetura](#arquitetura)
-10. [Rotas](#rotas)
-11. [Formulário de cadastro](#formulário-de-cadastro)
-12. [Dados salvos no navegador](#dados-salvos-no-navegador)
-13. [Gráfico com Chart.js](#gráfico-com-chartjs)
-14. [Componentes de feedback](#componentes-de-feedback)
-15. [Acessibilidade](#acessibilidade)
-16. [Versionamento e contribuição](#versionamento-e-contribuição)
+8. [Deploy](#deploy)
+9. [Estrutura de pastas](#estrutura-de-pastas)
+10. [Arquitetura](#arquitetura)
+11. [Rotas](#rotas)
+12. [Formulário de cadastro](#formulário-de-cadastro)
+13. [Dados salvos no navegador](#dados-salvos-no-navegador)
+14. [Gráfico com Chart.js](#gráfico-com-chartjs)
+15. [Componentes de feedback](#componentes-de-feedback)
+16. [Acessibilidade](#acessibilidade)
+17. [Versionamento e contribuição](#versionamento-e-contribuição)
 
 ## Visão geral
 
@@ -62,6 +63,7 @@ O projeto não tem back-end: o envio do cadastro é simulado no próprio navegad
 | [axe-core](https://github.com/dequelabs/axe-core) | 4.13.0 | Auditoria automática da WCAG 2.1 AA nos testes |
 | [W3C Nu Html Checker](https://validator.w3.org/nu/) | — | Validação do HTML e do CSS |
 | Git | — | Versionamento com GitFlow e Conventional Commits |
+| GitHub Actions e GitHub Pages | — | Testes a cada push e pull request e deploy do build de produção |
 
 ## Pré-requisitos
 
@@ -228,6 +230,26 @@ validados no [W3C Nu Html Checker](https://validator.w3.org/nu/), sem erros, ass
 gerado por uma rota, copie o elemento `<html>` no DevTools (Copy outerHTML) e cole na opção
 "Text input" do validador.
 
+## Deploy
+
+O site é publicado no **GitHub Pages** pelo **GitHub Actions**, com o workflow
+`.github/workflows/deploy.yml`:
+
+1. A cada push na `main` e a cada pull request, o workflow instala as dependências com `npm ci`
+   (versões exatas do `package-lock.json`), roda os testes de unidade, a verificação de contraste, o
+   build de produção e os testes de ponta a ponta no código-fonte e no build.
+2. Se tudo passar e o push for na `main`, a pasta `dist/` é empacotada
+   (`actions/upload-pages-artifact`) e publicada (`actions/deploy-pages`). Nos pull requests, o
+   workflow só testa; se um teste falhar, nada é publicado.
+3. O site fica em `https://<seu-usuario>.github.io/ong-maos-solidarias/`. Como a navegação usa o
+   hash (`#/projetos`) e todos os caminhos do build são relativos, ele funciona nesse subcaminho
+   sem nenhuma configuração de servidor. O GitHub Pages serve os arquivos por HTTPS e com
+   compressão gzip.
+
+Configuração, uma única vez, no repositório do GitHub: **Settings > Pages > Build and deployment >
+Source: GitHub Actions**. Para publicar de novo sem um novo commit, use **Actions > Testes e deploy
+> Run workflow**.
+
 ## Estrutura de pastas
 
 ```
@@ -237,7 +259,9 @@ ong-maos-solidarias/
 ├── package.json              Scripts (start, build, preview, imagens, test, test:e2e...) e dependências de desenvolvimento
 ├── package-lock.json         Versões exatas das dependências instaladas
 ├── playwright.config.js      Configuração dos testes de ponta a ponta
-├── .gitignore                Arquivos fora do repositório (node_modules, relatórios de teste)
+├── .gitignore                Arquivos fora do repositório (node_modules, dist, relatórios de teste)
+├── .github/workflows/
+│   └── deploy.yml            Testes e deploy no GitHub Pages (GitHub Actions)
 ├── ferramentas/
 │   ├── servidor.js           Servidor local sem dependências (npm start e npm run preview)
 │   ├── build.js              Build de produção com esbuild e html-minifier-terser (npm run build)
@@ -460,6 +484,7 @@ As mensagens de commit seguem o Conventional Commits, no formato `tipo(escopo): 
 | `test` | Testes automatizados | `test: adiciona testes de ponta a ponta com Playwright` |
 | `docs` | Documentação | `docs: documenta estrutura, execução, módulos e versionamento no README` |
 | `build` | Dependências, empacotamento e ferramentas | `build: empacota o Chart.js 4.5.1 com esbuild` |
+| `ci` | Integração contínua e deploy | `ci: testa o projeto e publica o build no GitHub Pages com GitHub Actions` |
 | `chore` | Tarefas de manutenção e versões | `chore(release): prepara a versão 1.0.0` |
 
 As versões seguem o Versionamento Semântico (MAIOR.MENOR.CORREÇÃO), e as mudanças de cada versão
