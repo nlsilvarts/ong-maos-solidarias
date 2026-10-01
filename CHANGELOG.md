@@ -4,6 +4,21 @@ Todas as mudanças importantes do projeto são registradas aqui.
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e as versões seguem o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.1.0] - 2026-09-30
+
+### Adicionado
+- Testes de unidade com o executor nativo do Node.js (`npm test`): regras de validação, máscaras,
+  templates, dados das campanhas, localStorage e histórico de envios.
+- Testes de ponta a ponta com Playwright (`npm run test:e2e`): navegação, cadastro, persistência e
+  gráfico, incluindo o teste de regressão do defeito corrigido na versão 1.0.1.
+- Servidor local sem dependências (`npm start`) e o script `npm run build`.
+- `package-lock.json` com as versões exatas das dependências de desenvolvimento.
+
+### Alterado
+- README reorganizado: visão geral, tecnologias, pré-requisitos, instalação, execução, build,
+  testes, arquitetura e acessibilidade.
+- Links do CHANGELOG relativos ao repositório.
+
 ## [1.0.1] - 2026-09-30
 
 ### Corrigido
@@ -29,5 +44,6 @@ e as versões seguem o [Versionamento Semântico](https://semver.org/lang/pt-BR/
 - Formulário dividido em módulos com responsabilidade única (`campos.js`, `resumo-erros.js`
   e o controlador `formulario.js`).
 
-[1.0.1]: https://github.com/SEU-USUARIO/ong-maos-solidarias/compare/v1.0.0...v1.0.1
-[1.0.0]: https://github.com/SEU-USUARIO/ong-maos-solidarias/releases/tag/v1.0.0
+[1.1.0]: ../../compare/v1.0.1...v1.1.0
+[1.0.1]: ../../compare/v1.0.0...v1.0.1
+[1.0.0]: ../../releases/tag/v1.0.0
