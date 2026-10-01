@@ -30,8 +30,10 @@ export function iniciarFormulario(formulario) {
   const tocados = new Set(); // campos que o usuário já preencheu ou tentou enviar
   let temporizadorRascunho = null;
 
+  // Sem o aceite, o botão fica indisponível com aria-disabled: diferente de disabled, ele continua
+  // na ordem do Tab, e quem usa leitor de tela chega até ele e ouve a dica (aria-describedby)
   const atualizarBotaoEnviar = () => {
-    botaoEnviar.disabled = !aceite.checked;
+    botaoEnviar.setAttribute("aria-disabled", String(!aceite.checked));
   };
 
   // Grava o rascunho 400 ms depois da última digitação (evita gravar a cada tecla)
@@ -85,6 +87,15 @@ export function iniciarFormulario(formulario) {
   formulario.addEventListener("submit", (evento) => {
     evento.preventDefault();
 
+    // Botão indisponível: acionado, leva ao aceite, que é o que falta para enviar.
+    // Um Enter dentro de um campo não faz nada, como acontecia com o botão desabilitado
+    if (botaoEnviar.getAttribute("aria-disabled") === "true") {
+      if (document.activeElement === botaoEnviar) {
+        aceite.focus();
+      }
+      return;
+    }
+
     const erros = Object.keys(REGRAS)
       .map((nome) => {
         tocados.add(nome);
@@ -108,8 +119,8 @@ export function iniciarFormulario(formulario) {
     mostrarHistorico();
     document.getElementById("modal-cadastro-nome").textContent = primeiroNome;
 
-    // Ao fechar, o navegador devolveria o foco ao botão "Enviar", que fica desabilitado após
-    // o envio, e o foco se perderia. Ele vai para o título do histórico, que recebeu o novo envio.
+    // Ao fechar, o foco vai para o título do histórico, que acabou de receber o novo envio
+    // (antes, voltava ao botão "Enviar", desabilitado após o envio, e se perdia).
     modal.addEventListener("close", () => focar(document.getElementById("historico-titulo")), { once: true });
 
     modal.showModal();
@@ -129,14 +140,18 @@ export function iniciarFormulario(formulario) {
     }, 0);
   });
 
+  // Os dois botões abaixo somem depois de usados (o aviso e o histórico ficam ocultos).
+  // Para o foco não se perder, ele vai para o título da página antes da notificação
   document.getElementById("botao-descartar-rascunho").addEventListener("click", () => {
     formulario.reset();
+    focar(document.querySelector("main h1"));
     mostrarToast("Rascunho descartado.", "info");
   });
 
   document.getElementById("botao-apagar-historico").addEventListener("click", () => {
     apagarHistorico();
     mostrarHistorico();
+    focar(document.querySelector("main h1"));
     mostrarToast("Histórico de cadastros apagado.", "info");
   });
 
