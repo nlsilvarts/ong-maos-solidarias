@@ -4,6 +4,22 @@ Todas as mudanças importantes do projeto são registradas aqui.
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e as versões seguem o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.2.1] - 2026-10-01
+
+### Corrigido
+- Contorno de foco invisível nos links do rodapé (verde sobre verde) e ausente no seletor de
+  data; o `<summary>` passa a ter o mesmo contorno de 3px dos outros elementos, e o botão do
+  submenu ganhou espaço para o contorno não encostar no item da página atual.
+- O botão "Enviar cadastro" desabilitado saía da ordem do Tab, e o leitor de tela não chegava à
+  dica. Agora ele usa `aria-disabled` e, acionado sem o aceite, leva o foco até o aceite.
+- Os botões de fechar alertas tinham o mesmo nome ("Fechar aviso"), e dois links "Quero ser
+  voluntário" levavam a destinos diferentes. Agora os nomes são distintos.
+- O foco se perdia ao apagar o histórico ou descartar o rascunho; agora vai para o título da página.
+
+### Adicionado
+- Testes que percorrem cada tela com Tab e conferem, em cada parada, o contorno de foco com
+  contraste mínimo de 3:1.
+
 ## [1.2.0] - 2026-10-01
 
 ### Adicionado
@@ -70,6 +86,7 @@ e as versões seguem o [Versionamento Semântico](https://semver.org/lang/pt-BR/
 - Formulário dividido em módulos com responsabilidade única (`campos.js`, `resumo-erros.js`
   e o controlador `formulario.js`).
 
+[1.2.1]: ../../compare/v1.2.0...v1.2.1
 [1.2.0]: ../../compare/v1.1.0...v1.2.0
 [1.1.0]: ../../compare/v1.0.1...v1.1.0
 [1.0.1]: ../../compare/v1.0.0...v1.0.1
