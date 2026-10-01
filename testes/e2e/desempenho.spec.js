@@ -80,7 +80,9 @@ for (const { tela, viewport } of [
 }
 
 test.describe("Build de produção @producao", () => {
-  test("HTML, CSS e JS minificados, com hash do conteúdo no nome dos arquivos", async ({ page, request }) => {
+  test("HTML, CSS e JS minificados e servidos com gzip, com hash do conteúdo no nome dos arquivos", async ({ page, request }) => {
+    const respostas = new Map();
+    page.on("response", (resposta) => respostas.set(new URL(resposta.url()).pathname.split("/").pop(), resposta));
     await page.goto(PAGINA);
     await expect(page.locator("main h1")).toBeVisible();
 
@@ -88,6 +90,9 @@ test.describe("Build de produção @producao", () => {
     const css = await page.locator('link[rel="stylesheet"]').getAttribute("href");
     expect(js).toMatch(/^assets\/main-[A-Z0-9]{8}\.js$/);
     expect(css).toMatch(/^assets\/estilos-[A-Z0-9]{8}\.css$/);
+    for (const arquivo of [js, css].map((endereco) => endereco.split("/").pop())) {
+      expect(respostas.get(arquivo).headers()["content-encoding"], `${arquivo} com gzip`).toBe("gzip");
+    }
 
     const html = await (await request.get(PAGINA)).text();
     expect(html).not.toContain("\n");
@@ -103,7 +108,7 @@ test.describe("Build de produção @producao", () => {
 
     const recursos = await page.evaluate(() =>
       [...performance.getEntriesByType("navigation"), ...performance.getEntriesByType("resource")]
-        .map((recurso) => ({ nome: recurso.name, bytes: recurso.encodedBodySize })));
+        .map((recurso) => ({ nome: recurso.name, bytes: recurso.decodedBodySize })));   // tamanho sem o gzip
     const soma = (padrao) => recursos.filter((r) => padrao.test(r.nome)).reduce((total, r) => total + r.bytes, 0);
 
     expect(recursos.some((r) => /chart\.esm/.test(r.nome))).toBe(false);   // o Chart.js fica para a página de projetos

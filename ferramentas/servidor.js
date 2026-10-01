@@ -9,6 +9,9 @@
  * Prefixo: com PREFIXO=/ong-maos-solidarias/, o site fica em um subcaminho, como
  * no GitHub Pages (usuario.github.io/ong-maos-solidarias/). Os testes do build
  * usam esse modo para conferir que nenhum endereço depende da raiz do domínio.
+ * Compressão: HTML, CSS, JS e mapas saem comprimidos com gzip quando o navegador
+ * aceita, também como no GitHub Pages. Assim, medições de desempenho feitas no
+ * preview (Lighthouse, aba Rede do DevTools) refletem o site publicado.
  *
  * O site usa módulos JavaScript (import/export), que os navegadores bloqueiam
  * quando o arquivo é aberto direto do disco (file://). Por isso o projeto
@@ -18,6 +21,7 @@
 import { createServer } from "node:http";
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
+import { gzipSync } from "node:zlib";
 import { extname, join, normalize, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -44,6 +48,8 @@ const TIPOS = {
   ".avif": "image/avif",
   ".ico": "image/x-icon"
 };
+
+const COMPRIMIVEIS = /^(text\/|application\/json|image\/svg)/;
 
 function responder(resposta, status, texto) {
   resposta.writeHead(status, { "Content-Type": "text/plain; charset=utf-8" });
@@ -86,8 +92,14 @@ const servidor = createServer(async (requisicao, resposta) => {
   }
 
   try {
-    const conteudo = await readFile(arquivo);
-    resposta.writeHead(200, { "Content-Type": TIPOS[extname(arquivo).toLowerCase()] || "application/octet-stream" });
+    let conteudo = await readFile(arquivo);
+    const tipo = TIPOS[extname(arquivo).toLowerCase()] || "application/octet-stream";
+    const cabecalhos = { "Content-Type": tipo, Vary: "Accept-Encoding" };
+    if (COMPRIMIVEIS.test(tipo) && /\bgzip\b/.test(requisicao.headers["accept-encoding"] ?? "")) {
+      conteudo = gzipSync(conteudo);
+      cabecalhos["Content-Encoding"] = "gzip";
+    }
+    resposta.writeHead(200, cabecalhos);
     resposta.end(conteudo);
   } catch {
     responder(resposta, 404, "Arquivo não encontrado");
