@@ -102,18 +102,23 @@ a {
   color: var(--cor-primaria-escura);
 }
 
-a:focus-visible,
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
+/* Foco visível em todo elemento que o recebe pelo teclado: links, botões, campos e <summary>.
+   (Títulos e o <main>, que só recebem o foco pelo script, ficam sem contorno: ver reset.css) */
+:focus-visible {
   outline: 3px solid var(--cor-foco);
   outline-offset: 2px;
 }
 
-/* Sobre o fundo verde do cabeçalho, o contorno de foco fica branco */
-header a:focus-visible,
-header button:focus-visible,
+/* O seletor de data recebe o foco nas partes internas (dia, mês, ano e o botão do
+   calendário): o contorno vai no campo inteiro enquanto alguma delas tem o foco */
+input[type="date"]:focus-within {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+/* Sobre os fundos verdes do cabeçalho e do rodapé, o contorno de foco fica branco */
+header :focus-visible,
+footer :focus-visible,
 .pular-conteudo:focus-visible {
   outline-color: var(--cor-branco);
 }
@@ -1258,10 +1263,11 @@ footer p {
   }
 
   /* ---------- Dropdown ---------- */
+  /* O espaço entre o link e o botão evita que o contorno de foco do botão encoste no link */
   .tem-submenu {
     position: relative;
     flex-wrap: nowrap;
-    gap: 0.125rem;
+    gap: var(--espaco-2);
   }
 
   .js .submenu-toggle {
