@@ -1,6 +1,6 @@
 {
   "name": "ong-maos-solidarias",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "private": true,
   "type": "module",
   "description": "Site da ONG Mãos Solidárias (SPA em HTML, CSS e JavaScript puro).",
@@ -12,7 +12,8 @@
     "build": "npm run build:vendor",
     "build:vendor": "esbuild ferramentas/chart-entrada.js --bundle --format=esm --minify --legal-comments=eof --outfile=js/vendor/chart.esm.js",
     "test": "node --test",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "contraste": "node ferramentas/contraste.js"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

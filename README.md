@@ -125,10 +125,12 @@ não passam por build: são servidos como estão.
 |---|---|---|
 | `npm test` | Testes de unidade, sem navegador | `node:test`, nativo do Node.js |
 | `npm run test:e2e` | Testes de ponta a ponta no Chromium | Playwright |
+| `npm run contraste` | Tabela de contraste de cada par de cores do Design System | `ferramentas/contraste.js` (fórmula da WCAG) |
 
 **Unidade (`testes/unidade/`):** regras de validação (CPF, idade, telefone, CEP e demais campos),
 máscaras, templates (inclusive o `escapar()` contra HTML injetado), percentual das campanhas,
-leitura e gravação no localStorage (com um armazenamento em memória) e histórico de envios.
+leitura e gravação no localStorage (com um armazenamento em memória), histórico de envios e
+contraste de cada par de cores do site, no modo normal e no alto contraste.
 
 **Ponta a ponta (`testes/e2e/`):** o Playwright inicia o servidor local, abre o Chromium e usa o
 site como uma pessoa usaria:
@@ -163,12 +165,13 @@ gerado por uma rota, copie o elemento `<html>` no DevTools (Copy outerHTML) e co
 ong-maos-solidarias/
 ├── README.md                 Esta documentação
 ├── CHANGELOG.md              Histórico de versões
-├── package.json              Scripts (start, build, test, test:e2e) e dependências de desenvolvimento
+├── package.json              Scripts (start, build, test, test:e2e, contraste) e dependências de desenvolvimento
 ├── package-lock.json         Versões exatas das dependências instaladas
 ├── playwright.config.js      Configuração dos testes de ponta a ponta
 ├── .gitignore                Arquivos fora do repositório (node_modules, relatórios de teste)
 ├── ferramentas/
 │   ├── servidor.js           Servidor local sem dependências (npm start)
+│   ├── contraste.js          Contraste das cores do Design System pela fórmula da WCAG (npm run contraste)
 │   └── chart-entrada.js      Entrada do pacote do Chart.js (só os componentes usados)
 ├── html/
 │   └── index.html            Casca da SPA: cabeçalho, menu, <main> vazio e rodapé
@@ -185,7 +188,7 @@ ong-maos-solidarias/
 │       ├── templates.js      Templates reutilizáveis (cartões, badges, alertas, imagens)
 │       ├── dados.js          Dados dos projetos, campanhas e listas do formulário
 │       ├── armazenamento.js  Leitura e gravação no localStorage (JSON.stringify / JSON.parse)
-│       ├── preferencias.js   Preferência "Texto maior"
+│       ├── preferencias.js   Preferências "Alto contraste" e "Texto maior"
 │       ├── rascunho.js       Rascunho do cadastro (sem CPF e sem aceite)
 │       ├── historico.js      Histórico dos cadastros enviados
 │       ├── grafico-campanhas.js  Gráfico de progresso das campanhas (Chart.js)
@@ -291,7 +294,8 @@ Tipos disponíveis: `info`, `sucesso`, `aviso` e `erro`.
 ## Acessibilidade
 
 O site segue a WCAG 2.1, nível AA. A conformidade é verificada automaticamente pelo axe-core nos
-testes de ponta a ponta (`testes/e2e/acessibilidade.spec.js`) e manualmente, com o teclado.
+testes de ponta a ponta (`testes/e2e/acessibilidade.spec.js`), pela verificação de contraste das
+cores (`npm run contraste`) e manualmente, com o teclado.
 
 **Estrutura e marcos (landmarks)**
 
@@ -332,9 +336,13 @@ testes de ponta a ponta (`testes/e2e/acessibilidade.spec.js`) e manualmente, com
 
 **Contraste e preferências visuais**
 
-- Cores de texto do Design System com contraste de pelo menos 4,5:1 (WCAG AA).
+- Cores do Design System com contraste de pelo menos 4,5:1 no texto e 3:1 nas bordas dos campos,
+  nos ícones, no contorno de foco e nas barras do gráfico (WCAG AA). O laranja da marca (#f28c28)
+  fica só nos detalhes decorativos, porque daria 2,45:1 com texto branco; os botões usam #a65300
+  (5,44:1). O comando `npm run contraste` mostra a relação de cada par de cores, e o teste de
+  unidade falha se alguma ficar abaixo do mínimo.
 - Modo **Alto contraste**: fundo preto, texto branco e amarelo nos links, botões e foco (21:1 e
-  19,6:1). Liga pelo botão da barra de acessibilidade ou, sem escolha salva, pela configuração do
+  19,56:1). Liga pelo botão da barra de acessibilidade ou, sem escolha salva, pela configuração do
   sistema (`prefers-contrast: more`). O gráfico troca as cores junto.
 - Modo de cores forçadas do sistema (`forced-colors`, como o Alto Contraste do Windows): estados
   como "ligado" e "página atual" passam a usar as cores de destaque do sistema.
