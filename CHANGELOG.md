@@ -4,6 +4,30 @@ Todas as mudanças importantes do projeto são registradas aqui.
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e as versões seguem o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.3.0] - 2026-10-01
+
+### Adicionado
+- Build de produção (`npm run build`) com o esbuild como bundler: o JavaScript vira um pacote
+  minificado, com o Chart.js em um arquivo separado, carregado sob demanda; o CSS vira uma única
+  folha de estilo minificada; e o HTML é minificado pelo html-minifier-terser. Os arquivos levam
+  hash no nome e mapas de código. HTML, CSS e JS do projeto caem de 124,8 KB para 72,1 KB
+  (21,6 KB com gzip).
+- `npm run preview`, para conferir o build em um servidor local.
+- Otimização das imagens com o sharp (`npm run imagens`): JPG com o codificador mozjpeg, PNG com
+  paleta, WebP e a nova versão AVIF, de 20% a 78% menores que os originais.
+- Testes de ponta a ponta também no build de produção, servido em um subcaminho como no GitHub
+  Pages, com orçamento de tamanho: JS abaixo de 50 KB, CSS abaixo de 30 KB e primeira visita
+  abaixo de 100 KB.
+- Integração contínua e deploy no GitHub Pages com GitHub Actions: cada push e pull request roda
+  os testes, e a `main` é publicada se todos passarem.
+
+### Alterado
+- As imagens oferecem o AVIF antes do WebP, e a imagem principal do início tem
+  `fetchpriority="high"`.
+- `npm run build` passa a gerar o build de produção; o pacote do Chart.js agora é gerado por
+  `npm run build:vendor`.
+- Os originais das imagens foram para `imagens/originais/`, fora do site.
+
 ## [1.2.2] - 2026-10-01
 
 ### Adicionado
@@ -101,6 +125,7 @@ e as versões seguem o [Versionamento Semântico](https://semver.org/lang/pt-BR/
 - Formulário dividido em módulos com responsabilidade única (`campos.js`, `resumo-erros.js`
   e o controlador `formulario.js`).
 
+[1.3.0]: ../../compare/v1.2.2...v1.3.0
 [1.2.2]: ../../compare/v1.2.1...v1.2.2
 [1.2.1]: ../../compare/v1.2.0...v1.2.1
 [1.2.0]: ../../compare/v1.1.0...v1.2.0
