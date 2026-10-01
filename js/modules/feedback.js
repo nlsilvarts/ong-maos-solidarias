@@ -11,6 +11,7 @@
  * Tipos disponíveis: info, sucesso, aviso, erro.
  */
 import { ICONES } from "./templates.js";
+import { focar } from "./foco.js";
 
 let areaToasts = null;
 
@@ -36,18 +37,47 @@ export function mostrarToast(mensagem, tipo = "info") {
   const texto = document.createElement("p");
   texto.textContent = mensagem;
 
+  // Quem estava com o foco quando a notificação apareceu (para devolvê-lo ao fechar)
+  const origem = document.activeElement;
+
   const fechar = document.createElement("button");
   fechar.type = "button";
   fechar.className = "botao-fechar";
   fechar.setAttribute("aria-label", "Fechar notificação");
   fechar.textContent = "×";
-  fechar.addEventListener("click", () => removerToast(toast));
+  fechar.addEventListener("click", () => {
+    removerToast(toast);
+    focar(origem && origem.isConnected && origem !== document.body ? origem : document.querySelector("main h1"));
+  });
 
   toast.append(icone, texto, fechar);
   areaToasts.appendChild(toast);
 
-  // Some sozinho depois de 5 segundos
-  setTimeout(() => removerToast(toast), 5000);
+  // Some sozinho depois de 5 segundos, mas o tempo para enquanto o mouse ou o foco
+  // estiverem sobre a notificação, para dar tempo de ler (WCAG 2.2.1)
+  let temporizador = null;
+  const iniciarContagem = () => {
+    clearTimeout(temporizador);
+    temporizador = setTimeout(() => removerToast(toast), 5000);
+  };
+  const pausar = () => clearTimeout(temporizador);
+  toast.addEventListener("mouseenter", pausar);
+  toast.addEventListener("mouseleave", iniciarContagem);
+  toast.addEventListener("focusin", pausar);
+  toast.addEventListener("focusout", (evento) => {
+    if (!toast.contains(evento.relatedTarget)) iniciarContagem();
+  });
+  iniciarContagem();
+}
+
+/* Ao fechar um alerta, o botão que tinha o foco desaparece. Para o foco não voltar ao
+   início da página, ele vai para o título da seção do alerta (ou para o título da página) */
+function fecharAlerta(alerta) {
+  const tinhaFoco = alerta.contains(document.activeElement);
+  alerta.hidden = true;
+  if (tinhaFoco) {
+    focar(alerta.closest("section")?.querySelector("h2") || document.querySelector("main h1"));
+  }
 }
 
 function copiarTexto(texto, mensagemSucesso) {
@@ -70,7 +100,7 @@ function tratarCliques(evento) {
   }
 
   if (botao.matches(".alerta .botao-fechar")) {
-    botao.closest(".alerta").hidden = true;
+    fecharAlerta(botao.closest(".alerta"));
   } else if (botao.dataset.toast) {
     mostrarToast(botao.dataset.toast, botao.dataset.toastTipo);
   } else if (botao.dataset.abrirModal) {

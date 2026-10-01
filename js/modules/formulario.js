@@ -18,6 +18,7 @@ import { mostrarResumo, atualizarResumo } from "./resumo-erros.js";
 import { salvarRascunho, restaurarRascunho, descartarRascunho } from "./rascunho.js";
 import { registrarEnvio, mostrarHistorico, apagarHistorico, formatarDataHora } from "./historico.js";
 import { mostrarToast } from "./feedback.js";
+import { focar } from "./foco.js";
 
 export function iniciarFormulario(formulario) {
   const botaoEnviar = formulario.querySelector('button[type="submit"]');
@@ -109,11 +110,7 @@ export function iniciarFormulario(formulario) {
 
     // Ao fechar, o navegador devolveria o foco ao botão "Enviar", que fica desabilitado após
     // o envio, e o foco se perderia. Ele vai para o título do histórico, que recebeu o novo envio.
-    modal.addEventListener("close", () => {
-      const tituloHistorico = document.getElementById("historico-titulo");
-      tituloHistorico.setAttribute("tabindex", "-1");
-      tituloHistorico.focus();
-    }, { once: true });
+    modal.addEventListener("close", () => focar(document.getElementById("historico-titulo")), { once: true });
 
     modal.showModal();
     formulario.reset();

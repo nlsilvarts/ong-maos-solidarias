@@ -111,4 +111,27 @@ test.describe("Semântica, teclado e WAI-ARIA", () => {
     await expect(page).toHaveURL(/#\/projetos\/campanhas$/);
     await expect(botao).toHaveAttribute("aria-expanded", "false");
   });
+
+  test("fechar um alerta pelo teclado leva o foco ao título da seção", async ({ page }) => {
+    await page.goto(`${PAGINA}#/projetos`);
+    const alerta = page.locator("#campanhas .alerta");
+    await alerta.getByRole("button", { name: "Fechar aviso" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(alerta).toBeHidden();
+    await expect(page.locator("#campanhas h2")).toBeFocused();
+  });
+
+  test("a notificação (toast) não some enquanto o mouse está sobre ela", async ({ page }) => {
+    await page.clock.install();
+    await page.goto(`${PAGINA}#/componentes`);
+    await page.getByRole("button", { name: "Toast de aviso" }).click();
+    const toast = page.locator(".toast");
+    await toast.hover();
+    await page.clock.runFor(8000);
+    await expect(toast).toBeVisible();
+
+    await page.mouse.move(0, 0);
+    await page.clock.runFor(6000);
+    await expect(toast).toHaveCount(0);
+  });
 });
