@@ -166,3 +166,74 @@ test.describe("Semântica, teclado e WAI-ARIA", () => {
     await expect(page.getByRole("table", { name: "Arrecadação de cada campanha em relação à meta" })).toBeVisible();
   });
 });
+
+test.describe("Alto contraste", () => {
+  const botaoContraste = (page) => page.getByRole("button", { name: "Alto contraste" });
+  const corDasBarras = (page) => page.evaluate(async () => {
+    const { Chart } = await import("/js/vendor/chart.esm.js");
+    return Chart.getChart("grafico-campanhas").data.datasets[0].backgroundColor;
+  });
+
+  for (const rota of ["inicio", "projetos", "componentes"]) {
+    test(`#/${rota} em alto contraste sem violações (inclui o contraste de cores)`, async ({ page }) => {
+      await page.goto(`${PAGINA}#/${rota}`);
+      await botaoContraste(page).click();
+      await expect(page.locator("html")).toHaveClass(/alto-contraste/);
+      await semViolacoes(page);
+    });
+  }
+
+  test("cadastro com erros e modal em alto contraste sem violações", async ({ page }) => {
+    await page.goto(`${PAGINA}#/cadastro`);
+    await botaoContraste(page).click();
+    await page.check("#aceite");
+    await page.getByRole("button", { name: "Enviar cadastro" }).click();
+    await semViolacoes(page);
+
+    await preencherCadastro(page);
+    await page.getByRole("button", { name: "Enviar cadastro" }).click();
+    await expect(page.locator("#modal-cadastro")).toBeVisible();
+    await semViolacoes(page);
+  });
+
+  test("o botão informa o estado com aria-pressed e a escolha continua depois de recarregar", async ({ page }) => {
+    await page.goto(PAGINA);
+    await expect(botaoContraste(page)).toHaveAttribute("aria-pressed", "false");
+    await botaoContraste(page).click();
+    await expect(botaoContraste(page)).toHaveAttribute("aria-pressed", "true");
+    expect(await page.evaluate(() => localStorage.getItem("ong-maos-solidarias:preferencias"))).toContain('"altoContraste":true');
+
+    await page.reload();
+    await expect(page.locator("html")).toHaveClass(/alto-contraste/);
+    await expect(botaoContraste(page)).toHaveAttribute("aria-pressed", "true");
+  });
+
+  test("sem escolha salva, segue a configuração do sistema (prefers-contrast: more)", async ({ page }) => {
+    await page.emulateMedia({ contrast: "more" });
+    await page.goto(PAGINA);
+    await expect(page.locator("html")).toHaveClass(/alto-contraste/);
+    await expect(botaoContraste(page)).toHaveAttribute("aria-pressed", "true");
+
+    // Depois que a pessoa desliga, a escolha dela vale mais que a do sistema
+    await botaoContraste(page).click();
+    await page.reload();
+    await expect(page.locator("html")).not.toHaveClass(/alto-contraste/);
+  });
+
+  test("o gráfico troca as cores das barras junto com o tema", async ({ page }) => {
+    await page.goto(`${PAGINA}#/projetos`);
+    await expect.poll(() => corDasBarras(page)).toBe("#1f8a5a");
+    await botaoContraste(page).click();
+    await expect.poll(() => corDasBarras(page)).toBe("#ffff00");
+    await botaoContraste(page).click();
+    await expect.poll(() => corDasBarras(page)).toBe("#1f8a5a");
+  });
+
+  test("com cores forçadas do sistema, o botão ligado continua diferente do desligado", async ({ page }) => {
+    await page.emulateMedia({ forcedColors: "active" });
+    await page.goto(PAGINA);
+    await page.getByRole("button", { name: "Texto maior" }).click();
+    const fundo = (nome) => page.getByRole("button", { name: nome }).evaluate((botao) => getComputedStyle(botao).backgroundColor);
+    expect(await fundo("Texto maior")).not.toBe(await fundo("Alto contraste"));
+  });
+});

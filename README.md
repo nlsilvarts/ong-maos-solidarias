@@ -35,8 +35,10 @@ Principais funcionalidades:
   botões Voltar e Avançar do navegador funcionando a cada troca de página.
 - **Cadastro** com máscaras de CPF, telefone e CEP e verificação de consistência em tempo real
   (dígitos do CPF, idade mínima, DDD), com resumo de erros e links para os campos.
-- **Persistência no navegador** (localStorage): preferência "Texto maior", rascunho do cadastro e
-  histórico dos envios.
+- **Persistência no navegador** (localStorage): preferências "Alto contraste" e "Texto maior",
+  rascunho do cadastro e histórico dos envios.
+- **Acessibilidade** seguindo a WCAG 2.1 nível AA: marcos, WAI-ARIA, navegação completa pelo
+  teclado e modo de alto contraste.
 - **Gráfico de arrecadação** das campanhas com Chart.js, carregado só na página de projetos.
 - **Componentes de feedback** reutilizáveis: badges, alertas, toasts e modais.
 - **Layout responsivo** com Grid de 12 colunas, cinco breakpoints e menu hambúrguer no celular.
@@ -55,6 +57,7 @@ O projeto não tem back-end: o envio do cadastro é simulado no próprio navegad
 | [Node.js](https://nodejs.org/) e npm | 20 ou superior | Servidor local, build e testes |
 | `node:test` | nativo do Node.js | Testes de unidade |
 | [Playwright](https://playwright.dev/) | 1.56.0 | Testes de ponta a ponta no Chromium |
+| [axe-core](https://github.com/dequelabs/axe-core) | 4.13.0 | Auditoria automática da WCAG 2.1 AA nos testes |
 | [W3C Nu Html Checker](https://validator.w3.org/nu/) | — | Validação do HTML e do CSS |
 | Git | — | Versionamento com GitFlow e Conventional Commits |
 
@@ -73,7 +76,7 @@ O projeto não tem back-end: o envio do cadastro é simulado no próprio navegad
 ```bash
 git clone <endereço-do-repositório>
 cd ong-maos-solidarias
-npm install                        # Chart.js, esbuild e Playwright (dependências de desenvolvimento)
+npm install                        # Chart.js, esbuild, Playwright e axe-core (dependências de desenvolvimento)
 npx playwright install chromium    # navegador usado nos testes de ponta a ponta
 ```
 
@@ -136,7 +139,10 @@ site como uma pessoa usaria:
   de regressão do defeito corrigido na versão 1.0.1 (foco ao fechar o modal);
 - `persistencia.spec.js`: preferência de texto, rascunho sem CPF e dados corrompidos no localStorage;
 - `grafico.spec.js`: carregamento sob demanda do Chart.js, destruição do gráfico ao sair da página
-  e tabela alternativa quando a biblioteca não carrega.
+  e tabela alternativa quando a biblioteca não carrega;
+- `acessibilidade.spec.js`: auditoria da WCAG 2.1 AA com o axe-core em todas as rotas e estados
+  (erros, modal, menu do celular, alto contraste), marcos, submenu pelo teclado, foco ao fechar
+  alertas, nomes acessíveis do formulário e preferências visuais.
 
 Comandos úteis:
 
@@ -183,7 +189,8 @@ ong-maos-solidarias/
 │       ├── rascunho.js       Rascunho do cadastro (sem CPF e sem aceite)
 │       ├── historico.js      Histórico dos cadastros enviados
 │       ├── grafico-campanhas.js  Gráfico de progresso das campanhas (Chart.js)
-│       ├── menu.js           Menu hambúrguer
+│       ├── menu.js           Menu hambúrguer e submenu (aria-expanded)
+│       ├── foco.js           Gestão de foco (rotas, alertas, notificações e modal)
 │       ├── feedback.js       Toasts, alertas, modais e botão de copiar
 │       ├── mascaras.js       Máscaras de CPF, telefone e CEP
 │       ├── validacao.js      Regras de consistência (RegEx, CPF, idade, telefone...)
@@ -217,7 +224,7 @@ roteador. A cada mudança no endereço (evento `hashchange`), o roteador:
 Cada arquivo de `js/modules` tem uma única responsabilidade e se comunica pelos `export` e `import`
 do ES6, sem variáveis globais. As dependências seguem um só sentido, sem ciclos:
 `main.js` → `router.js` → páginas → templates, dados e controladores → módulos-base
-(`dados`, `validacao`, `armazenamento`, `campos`, `resumo-erros`, `mascaras`, `menu`),
+(`dados`, `validacao`, `armazenamento`, `campos`, `resumo-erros`, `mascaras`, `menu`, `foco`),
 que não importam nenhum outro módulo do projeto.
 
 ## Rotas
@@ -251,11 +258,12 @@ Todas as chaves do localStorage começam com `ong-maos-solidarias:`.
 
 | Chave | Estrutura | Quando é gravada | Quando é restaurada |
 |---|---|---|---|
-| `preferencias` | objeto `{ textoGrande }` | Ao clicar em "Texto maior" | No `<head>`, antes da página aparecer |
+| `preferencias` | objeto `{ textoGrande, altoContraste }` | Ao clicar em "Alto contraste" ou "Texto maior" | No `<head>`, antes da página aparecer |
 | `rascunho-cadastro` | objeto `{ campos, areas, salvoEm }` | 400 ms após a última digitação | Ao abrir `#/cadastro` |
 | `cadastros-enviados` | array com até 5 envios `{ primeiroNome, participacao, enviadoEm }` | A cada envio válido | Ao abrir `#/cadastro` |
 
-Por privacidade, o rascunho não guarda o CPF nem o aceite da LGPD. Dados corrompidos ou fora do
+O campo `altoContraste` só é gravado depois que a pessoa escolhe; até lá, vale a configuração do
+sistema (`prefers-contrast: more`). Por privacidade, o rascunho não guarda o CPF nem o aceite da LGPD. Dados corrompidos ou fora do
 formato esperado são ignorados, e textos lidos do armazenamento passam por `escapar()` antes de
 entrar no HTML.
 
@@ -282,15 +290,48 @@ Tipos disponíveis: `info`, `sucesso`, `aviso` e `erro`.
 
 ## Acessibilidade
 
-- Link "Pular para o conteúdo" e foco levado ao título da página a cada troca de rota.
-- Menu com `aria-expanded` e `aria-controls`, que fecha com Esc; item atual marcado com
+O site segue a WCAG 2.1, nível AA. A conformidade é verificada automaticamente pelo axe-core nos
+testes de ponta a ponta (`testes/e2e/acessibilidade.spec.js`) e manualmente, com o teclado.
+
+**Estrutura e marcos (landmarks)**
+
+- `<header>` (banner), `<nav aria-label="Menu principal">`, `<main id="conteudo">` e `<footer>`
+  (contentinfo) em todas as páginas, além da região "Recursos de acessibilidade"
+  (`role="region"` com `aria-label`).
+- Um `<h1>` por página e seções com `<h2>`; cartões em `<article>`, listas, `<figure>` com
+  `<figcaption>`, `<address>` e tabela com `<caption>` e `<th scope>`.
+
+**WAI-ARIA nos elementos interativos**
+
+- Menu hambúrguer e submenu "Projetos" no padrão de divulgação (disclosure): `aria-expanded` e
+  `aria-controls`. O submenu abre com Enter ou Espaço e fecha com Esc, devolvendo o foco ao botão.
+- Botões "Alto contraste" e "Texto maior" com `aria-pressed`; item da página atual com
   `aria-current="page"`.
-- Campos com erro recebem `aria-invalid`, e o resumo de erros usa `role="alert"`.
-- Toasts em uma região `aria-live="polite"`; modais com o elemento nativo `<dialog>`.
+- Formulário: `aria-describedby` liga dicas e mensagens aos campos, `aria-invalid` marca os campos
+  com erro, o grupo de rádios é um `radiogroup` com `aria-required` e o resumo de erros usa
+  `role="alert"`. Os asteriscos têm `aria-hidden="true"`, pois o `required` já informa a obrigatoriedade.
+- Toasts em uma região `role="status"` com `aria-live="polite"`; modais com o `<dialog>` nativo,
+  `aria-labelledby` e `aria-describedby`.
 - Gráfico com `role="img"` e descrição no `aria-label`, além da tabela com os mesmos dados.
-- Cores de texto do Design System com contraste de pelo menos 4,5:1 (WCAG AA), foco visível com
-  `:focus-visible` e animações reduzidas com `prefers-reduced-motion`.
-- Preferência "Texto maior", salva no navegador.
+
+**Teclado e foco**
+
+- Link "Pular para o conteúdo" e foco sempre visível com `:focus-visible` (contorno de 3px).
+- A cada troca de rota, o foco vai para o título da página; ao fechar um alerta, para o título da
+  seção; ao fechar o modal do cadastro, para o histórico (`js/modules/foco.js`).
+- Esc fecha o menu, o submenu e os modais. Os toasts não somem enquanto o mouse ou o foco
+  estiverem sobre eles.
+
+**Contraste e preferências visuais**
+
+- Cores de texto do Design System com contraste de pelo menos 4,5:1 (WCAG AA).
+- Modo **Alto contraste**: fundo preto, texto branco e amarelo nos links, botões e foco (21:1 e
+  19,6:1). Liga pelo botão da barra de acessibilidade ou, sem escolha salva, pela configuração do
+  sistema (`prefers-contrast: more`). O gráfico troca as cores junto.
+- Modo de cores forçadas do sistema (`forced-colors`, como o Alto Contraste do Windows): estados
+  como "ligado" e "página atual" passam a usar as cores de destaque do sistema.
+- "Texto maior" amplia textos e espaçamentos, que usam rem; animações são reduzidas com
+  `prefers-reduced-motion`.
 
 ## Versionamento e contribuição
 

@@ -9,17 +9,28 @@
   <link rel="stylesheet" href="../css/reset.css">
   <link rel="stylesheet" href="../css/style.css">
   <script>
-    // Roda antes da primeira exibição: indica ao CSS que o JavaScript está ativo
-    // e aplica a preferência de texto maior salva no localStorage (ver preferencias.js)
-    document.documentElement.classList.add("js");
-    try {
-      var preferencias = JSON.parse(localStorage.getItem("ong-maos-solidarias:preferencias"));
-      if (preferencias && preferencias.textoGrande === true) {
-        document.documentElement.classList.add("texto-grande");
+    // Roda antes da primeira exibição: indica ao CSS que o JavaScript está ativo e aplica
+    // as preferências salvas no localStorage (ver preferencias.js), sem a página piscar
+    (function () {
+      var raiz = document.documentElement;
+      var preferencias = null;
+      raiz.classList.add("js");
+      try {
+        preferencias = JSON.parse(localStorage.getItem("ong-maos-solidarias:preferencias"));
+      } catch (erro) {
+        // Sem acesso ao localStorage ou valor corrompido: usa o padrão
       }
-    } catch (erro) {
-      // Sem acesso ao localStorage: mantém o tamanho padrão
-    }
+      if (preferencias && preferencias.textoGrande === true) {
+        raiz.classList.add("texto-grande");
+      }
+      // Alto contraste: vale a escolha salva; sem escolha, a configuração do sistema
+      var altoContraste = preferencias && typeof preferencias.altoContraste === "boolean"
+        ? preferencias.altoContraste
+        : window.matchMedia("(prefers-contrast: more)").matches;
+      if (altoContraste) {
+        raiz.classList.add("alto-contraste");
+      }
+    })();
   </script>
   <script type="module" src="../js/main.js"></script>
 </head>
@@ -30,6 +41,9 @@
   <!-- Barra de acessibilidade: região nomeada (marco), para ser encontrada pela lista de marcos
        dos leitores de tela. As preferências ficam salvas no localStorage -->
   <div class="barra-acessibilidade" role="region" aria-label="Recursos de acessibilidade">
+    <button type="button" id="botao-alto-contraste" class="botao-texto" aria-pressed="false">
+      <span class="icone-contraste" aria-hidden="true"></span> Alto contraste
+    </button>
     <button type="button" id="botao-texto-grande" class="botao-texto" aria-pressed="false">
       <span aria-hidden="true">A+</span> Texto maior
     </button>

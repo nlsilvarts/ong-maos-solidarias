@@ -121,6 +121,23 @@ export async function criarGraficoCampanhas(canvas, campanhas) {
   });
 }
 
+/* Relê as cores do Design System, por exemplo depois que o alto contraste é ligado.
+   O canvas não acompanha o CSS sozinho: as cores precisam ser passadas de novo */
+export function atualizarCoresDoGrafico() {
+  if (!grafico) {
+    return;
+  }
+  const corGrade = corDoTema("--cor-grade");
+  const { x, y } = grafico.options.scales;
+  grafico.data.datasets[0].backgroundColor = corDoTema("--cor-grafico");
+  x.ticks.color = corDoTema("--cor-texto-suave");
+  y.ticks.color = corDoTema("--cor-texto");
+  x.grid.color = corGrade;
+  x.border.color = corGrade;
+  y.border.color = corGrade;
+  grafico.update("none");
+}
+
 /* Libera o canvas e os observadores da biblioteca ao sair da página */
 export function destruirGraficoCampanhas() {
   if (grafico) {
