@@ -53,7 +53,7 @@ alerta({
 
       <section id="guia-toasts">
         <h2>Toasts (notificações)</h2>
-        <p>Aparecem no canto inferior da tela, são anunciados por leitores de tela e somem sozinhos após 5 segundos.</p>
+        <p>Aparecem no canto inferior da tela, são anunciados por leitores de tela e somem sozinhos após 5 segundos. O tempo para enquanto o mouse ou o foco estiverem sobre eles.</p>
         <div class="acoes">
           <button type="button" class="botao botao-pequeno" data-toast="Suas preferências foram salvas." data-toast-tipo="info">Toast de informação</button>
           <button type="button" class="botao botao-pequeno" data-toast="Chave PIX copiada!" data-toast-tipo="sucesso">Toast de sucesso</button>

@@ -4,7 +4,7 @@
  */
 import { projetos, campanhas, areasVoluntariado, percentualArrecadado } from "../dados.js";
 import { cartaoProjeto, cartaoCampanha, alerta, escapar, numero } from "../templates.js";
-import { criarGraficoCampanhas, destruirGraficoCampanhas } from "../grafico-campanhas.js";
+import { criarGraficoCampanhas, destruirGraficoCampanhas, atualizarCoresDoGrafico } from "../grafico-campanhas.js";
 
 /* Resumo em texto do gráfico, para leitores de tela */
 function descricaoGrafico() {
@@ -85,6 +85,7 @@ export default {
             <summary>Ver os dados em tabela</summary>
             <div class="tabela-rolavel">
               <table>
+                <caption class="visualmente-oculto">Arrecadação de cada campanha em relação à meta</caption>
                 <thead>
                   <tr>
                     <th scope="col">Campanha</th>
@@ -129,10 +130,13 @@ export default {
       raiz.querySelector("#grafico-aviso").hidden = false;
       raiz.querySelector("#grafico-tabela").open = true;
     });
+    // O gráfico é desenhado em canvas: troca as cores quando o alto contraste muda
+    document.addEventListener("preferencias-alteradas", atualizarCoresDoGrafico);
   },
 
   // Chamado pelo roteador antes de trocar de página
   sair() {
+    document.removeEventListener("preferencias-alteradas", atualizarCoresDoGrafico);
     destruirGraficoCampanhas();
   }
 };

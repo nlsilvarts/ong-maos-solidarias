@@ -15,6 +15,7 @@ import projetos from "./paginas/projetos.js";
 import cadastro from "./paginas/cadastro.js";
 import componentes from "./paginas/componentes.js";
 import naoEncontrada from "./paginas/nao-encontrada.js";
+import { focar } from "./foco.js";
 
 const ROTAS = { inicio, projetos, cadastro, componentes };
 const NOME_SITE = "ONG Mãos Solidárias";
@@ -38,18 +39,6 @@ function atualizarMenu(pagina) {
       link.removeAttribute("aria-current");
     }
   });
-}
-
-/* Leva o foco a um elemento sem rolar a tela (leitores de tela anunciam o novo título) */
-function focar(elemento) {
-  if (!elemento) {
-    return;
-  }
-  // Só elementos que não recebem foco naturalmente (títulos, seções) ganham tabindex
-  if (!elemento.matches("a[href], button, input, select, textarea, [tabindex]")) {
-    elemento.setAttribute("tabindex", "-1");
-  }
-  elemento.focus({ preventScroll: true });
 }
 
 function renderizar() {

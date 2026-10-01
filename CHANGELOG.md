@@ -4,6 +4,32 @@ Todas as mudanças importantes do projeto são registradas aqui.
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e as versões seguem o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.2.0] - 2026-10-01
+
+### Adicionado
+- Modo de alto contraste (fundo preto, texto branco e amarelo nos links, botões e foco), ligado
+  pelo botão "Alto contraste" ou pela configuração do sistema (`prefers-contrast: more`), com a
+  escolha salva no localStorage. O gráfico troca as cores junto.
+- Suporte ao modo de cores forçadas do sistema (`forced-colors`): botões ligados e página atual
+  usam as cores de destaque do sistema.
+- Auditoria automática da WCAG 2.1 AA com axe-core nos testes de ponta a ponta, inclusive no
+  modo de alto contraste.
+- Região "Recursos de acessibilidade" como marco (landmark) e legenda (`caption`) na tabela de
+  dados do gráfico.
+
+### Alterado
+- O submenu "Projetos" abre por um botão com `aria-expanded` e `aria-controls` (padrão de
+  divulgação do WAI-ARIA) e fecha com Esc, em vez de abrir com o mouse ou o foco.
+- O grupo "Como deseja participar?" passa a ser um `radiogroup` com `aria-required` e
+  `aria-invalid`; os asteriscos dos campos ficam ocultos dos leitores de tela.
+- Os toasts param a contagem enquanto o mouse ou o foco estiverem sobre eles.
+- A gestão de foco foi reunida no módulo `foco.js`.
+
+### Corrigido
+- O submenu aberto com o mouse ou o foco não fechava com Esc (WCAG 1.4.13).
+- Ao fechar um alerta pelo teclado, o foco ia para o início da página; agora vai para o título
+  da seção.
+
 ## [1.1.0] - 2026-09-30
 
 ### Adicionado
@@ -44,6 +70,7 @@ e as versões seguem o [Versionamento Semântico](https://semver.org/lang/pt-BR/
 - Formulário dividido em módulos com responsabilidade única (`campos.js`, `resumo-erros.js`
   e o controlador `formulario.js`).
 
+[1.2.0]: ../../compare/v1.1.0...v1.2.0
 [1.1.0]: ../../compare/v1.0.1...v1.1.0
 [1.0.1]: ../../compare/v1.0.0...v1.0.1
 [1.0.0]: ../../releases/tag/v1.0.0

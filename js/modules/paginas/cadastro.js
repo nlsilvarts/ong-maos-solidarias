@@ -13,7 +13,7 @@ function campo({ id, rotulo, tipo = "text", colunas = "col-12 col-md-6 col-xl-4"
   const idDica = dica ? `dica-${id}` : "";
   return `
     <div class="campo ${colunas}">
-      <label for="${id}">${rotulo}${obrigatorio ? ' <span class="obrigatorio">*</span>' : ""}</label>
+      <label for="${id}">${rotulo}${obrigatorio ? ' <span class="obrigatorio" aria-hidden="true">*</span>' : ""}</label>
       <input type="${tipo}" id="${id}" name="${id}"${obrigatorio ? " required" : ""} ${atributos}${idDica ? ` aria-describedby="${idDica}"` : ""}>
       ${dica ? `<span class="dica" id="${idDica}">${dica}</span>` : ""}
     </div>`;
@@ -98,7 +98,7 @@ export default {
             ${campo({ id: "bairro", rotulo: "Bairro", atributos: 'maxlength="60" autocomplete="address-level3"' })}
             ${campo({ id: "cidade", rotulo: "Cidade", atributos: 'maxlength="60" autocomplete="address-level2"' })}
             <div class="campo col-12 col-md-6 col-xl-4">
-              <label for="estado">Estado <span class="obrigatorio">*</span></label>
+              <label for="estado">Estado <span class="obrigatorio" aria-hidden="true">*</span></label>
               <select id="estado" name="estado" required autocomplete="address-level1">
                 <option value="">Selecione</option>
                 ${opcoesEstado}
@@ -110,8 +110,10 @@ export default {
         <fieldset>
           <legend>Forma de participação</legend>
 
-          <fieldset>
-            <legend>Como deseja participar? <span class="obrigatorio">*</span></legend>
+          <!-- radiogroup + aria-required: o grupo é anunciado como obrigatório, e o
+               script marca aria-invalid no grupo quando nenhuma opção é escolhida -->
+          <fieldset role="radiogroup" aria-required="true">
+            <legend>Como deseja participar? <span class="obrigatorio" aria-hidden="true">*</span></legend>
             <div class="opcoes">
               ${opcao({ tipo: "radio", nome: "participacao", valor: "voluntario", rotulo: "Voluntário", obrigatorio: true })}
               ${opcao({ tipo: "radio", nome: "participacao", valor: "doador", rotulo: "Doador" })}
@@ -140,7 +142,7 @@ export default {
           <div class="opcoes">
             <label for="aceite">
               <input type="checkbox" id="aceite" name="aceite" value="sim" required>
-              <span>Autorizo o uso dos meus dados pela ONG Mãos Solidárias, conforme a Lei Geral de Proteção de Dados (LGPD). <span class="obrigatorio">*</span></span>
+              <span>Autorizo o uso dos meus dados pela ONG Mãos Solidárias, conforme a Lei Geral de Proteção de Dados (LGPD). <span class="obrigatorio" aria-hidden="true">*</span></span>
             </label>
           </div>
         </fieldset>
