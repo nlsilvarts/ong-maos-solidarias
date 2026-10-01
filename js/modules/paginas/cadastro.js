@@ -149,7 +149,9 @@ export default {
 
         <p class="dica" id="dica-envio">Para enviar, é preciso aceitar o uso dos dados conforme a LGPD.</p>
         <div class="acoes">
-          <button type="submit" class="botao" aria-describedby="dica-envio" disabled>Enviar cadastro</button>
+          <!-- aria-disabled (e não disabled): o botão fica "indisponível", mas continua no Tab,
+               e o leitor de tela lê a dica ligada por aria-describedby -->
+          <button type="submit" class="botao" aria-describedby="dica-envio" aria-disabled="true">Enviar cadastro</button>
           <button type="reset" class="botao botao-secundario">Limpar campos</button>
         </div>
       </form>

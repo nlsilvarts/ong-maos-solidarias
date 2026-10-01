@@ -528,14 +528,14 @@ figcaption {
 }
 
 /* hover: cor mais escura, sombra maior e leve elevação */
-.botao:hover:not(:disabled) {
+.botao:hover:not(:disabled):not([aria-disabled="true"]) {
   background-color: var(--cor-secundaria-hover);
   box-shadow: var(--sombra-elevada);
   transform: translateY(-2px);
 }
 
 /* active: botão "afunda" ao ser pressionado */
-.botao:active:not(:disabled) {
+.botao:active:not(:disabled):not([aria-disabled="true"]) {
   background-color: var(--cor-secundaria-ativa);
   box-shadow: var(--sombra-pressionada);
   transform: translateY(0) scale(0.98);
@@ -546,8 +546,10 @@ figcaption {
   outline-offset: 3px;
 }
 
-/* disabled: botão apagado, sem sombra e sem efeitos */
-.botao:disabled {
+/* disabled: botão apagado, sem sombra e sem efeitos. aria-disabled tem o mesmo visual,
+   mas mantém o botão na ordem do Tab (o leitor de tela o anuncia como indisponível) */
+.botao:disabled,
+.botao[aria-disabled="true"] {
   opacity: 0.5;
   box-shadow: none;
   cursor: not-allowed;
@@ -557,11 +559,11 @@ figcaption {
   background-color: var(--cor-texto-suave);
 }
 
-.botao-secundario:hover:not(:disabled) {
+.botao-secundario:hover:not(:disabled):not([aria-disabled="true"]) {
   background-color: var(--cor-neutra-hover);
 }
 
-.botao-secundario:active:not(:disabled) {
+.botao-secundario:active:not(:disabled):not([aria-disabled="true"]) {
   background-color: var(--cor-texto);
 }
 
@@ -1529,13 +1531,13 @@ html.alto-contraste :is(.botao, .botao-secundario) {
   border: 2px solid var(--hc-destaque);
 }
 
-html.alto-contraste :is(.botao, .botao-secundario):is(:hover, :active):not(:disabled) {
+html.alto-contraste :is(.botao, .botao-secundario):is(:hover, :active):not(:disabled):not([aria-disabled="true"]) {
   color: var(--hc-fundo);
   background-color: var(--hc-destaque);
 }
 
 /* Desabilitado: cinza claro e borda tracejada, sem depender de transparência */
-html.alto-contraste .botao:disabled {
+html.alto-contraste .botao:is(:disabled, [aria-disabled="true"]) {
   opacity: 1;
   color: #bfbfbf;
   border: 2px dashed #bfbfbf;
@@ -1639,7 +1641,7 @@ html.alto-contraste .toast {
     border: 1px solid CanvasText;
   }
 
-  .botao:disabled {
+  .botao:is(:disabled, [aria-disabled="true"]) {
     color: GrayText;
     border: 2px dashed GrayText;
   }

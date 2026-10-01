@@ -301,4 +301,21 @@ test.describe("Teclado e leitores de tela", () => {
       expect(problemas).toEqual([]);
     });
   }
+
+  test("o botão Enviar continua no Tab, é anunciado como indisponível e leva ao aceite", async ({ page }) => {
+    await page.goto(`${PAGINA}#/cadastro`);
+    await page.locator("#mensagem").focus();
+    await page.keyboard.press("Tab");
+    await expect(page.locator("#aceite")).toBeFocused();
+    await page.keyboard.press("Tab");
+
+    const enviar = page.getByRole("button", { name: "Enviar cadastro" });
+    await expect(enviar).toBeFocused();
+    await expect(enviar).toHaveAttribute("aria-disabled", "true");
+    await expect(enviar).toHaveAccessibleDescription("Para enviar, é preciso aceitar o uso dos dados conforme a LGPD.");
+
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#aceite")).toBeFocused();
+    await expect(page.locator("#alerta-erro")).toBeHidden();
+  });
 });
