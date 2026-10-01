@@ -4,11 +4,16 @@
 import { projetos, institucional } from "../dados.js";
 import { cartaoProjeto, cartaoTexto, imagem } from "../templates.js";
 
-const fotoVoluntarios = {
+/* A ilustração ocupa toda a largura da coluna até 991 px de tela e 5 das 12 colunas a
+   partir daí (medido no layout: de 288 a 800 px). O sizes repete essas larguras para o
+   navegador escolher entre a versão de 400 px e a de 800 px */
+export const fotoVoluntarios = {
   arquivo: "voluntarios",
   alt: "Ilustração de voluntários atrás de uma mesa entregando caixas de alimentos a duas pessoas",
   largura: 800,
-  altura: 450
+  altura: 450,
+  menores: [400],
+  tamanhos: "(min-width: 1400px) 505px, (min-width: 1200px) 434px, (min-width: 992px) 38vw, (min-width: 576px) calc(100vw - 48px), calc(100vw - 32px)"
 };
 
 export default {

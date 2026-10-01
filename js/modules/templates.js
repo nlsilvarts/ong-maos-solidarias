@@ -24,14 +24,25 @@ export function numero(valor) {
 
 /* Imagem em três formatos (gerados por ferramentas/imagens.js): o navegador usa o primeiro
    que aceitar, AVIF ou WebP, e o JPG fica como alternativa. A imagem do topo da página
-   (carregamento "eager") também ganha prioridade alta no download */
-export function imagem({ arquivo, alt, largura, altura }, { carregamento = "lazy" } = {}) {
+   (carregamento "eager") também ganha prioridade alta no download.
+
+   Imagens que mudam muito de tamanho conforme a tela informam "menores" (larguras das
+   versões reduzidas, como voluntarios-400.avif) e "tamanhos" (a largura que ocupam em cada
+   faixa de tela, no atributo sizes). Com o srcset, o navegador baixa a menor versão que
+   fica nítida naquela tela, considerando também a densidade de pixels (1x, 2x, 3x) */
+export function imagem({ arquivo, alt, largura, altura, menores = [], tamanhos = "" }, { carregamento = "lazy" } = {}) {
+  const versoes = (formato) => menores.length === 0
+    ? `${PASTA_IMAGENS}${arquivo}.${formato}`
+    : [...menores.map((menor) => `${PASTA_IMAGENS}${arquivo}-${menor}.${formato} ${menor}w`),
+      `${PASTA_IMAGENS}${arquivo}.${formato} ${largura}w`].join(", ");
+  const sizes = menores.length > 0 ? ` sizes="${tamanhos}"` : "";
+  const srcsetDoJpg = menores.length > 0 ? ` srcset="${versoes("jpg")}"${sizes}` : "";
   const prioridade = carregamento === "eager" ? ' fetchpriority="high"' : "";
   return `
     <picture>
-      <source srcset="${PASTA_IMAGENS}${arquivo}.avif" type="image/avif">
-      <source srcset="${PASTA_IMAGENS}${arquivo}.webp" type="image/webp">
-      <img src="${PASTA_IMAGENS}${arquivo}.jpg" alt="${escapar(alt)}" width="${largura}" height="${altura}" loading="${carregamento}"${prioridade}>
+      <source srcset="${versoes("avif")}"${sizes} type="image/avif">
+      <source srcset="${versoes("webp")}"${sizes} type="image/webp">
+      <img src="${PASTA_IMAGENS}${arquivo}.jpg"${srcsetDoJpg} alt="${escapar(alt)}" width="${largura}" height="${altura}" loading="${carregamento}"${prioridade}>
     </picture>`;
 }
 
