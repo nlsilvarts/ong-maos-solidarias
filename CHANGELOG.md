@@ -4,6 +4,16 @@ Todas as mudanças importantes do projeto são registradas aqui.
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e as versões seguem o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.3.1] - 2026-10-01
+
+### Corrigido
+- Em telas estreitas, o logotipo era achatado (30 × 56 px a 390 px de largura), porque o
+  `<picture>` encolhia ao lado do nome da ONG. Agora ele mantém 56 × 56 px.
+
+### Alterado
+- A ilustração da página inicial ganhou uma versão de 400 px, além da de 800 px, escolhida pelo
+  navegador com `srcset` e `sizes`: um celular com tela 1x baixa 1,9 KB em AVIF, em vez de 3,5 KB.
+
 ## [1.3.0] - 2026-10-01
 
 ### Adicionado
@@ -125,6 +135,7 @@ e as versões seguem o [Versionamento Semântico](https://semver.org/lang/pt-BR/
 - Formulário dividido em módulos com responsabilidade única (`campos.js`, `resumo-erros.js`
   e o controlador `formulario.js`).
 
+[1.3.1]: ../../compare/v1.3.0...v1.3.1
 [1.3.0]: ../../compare/v1.2.2...v1.3.0
 [1.2.2]: ../../compare/v1.2.1...v1.2.2
 [1.2.1]: ../../compare/v1.2.0...v1.2.1
