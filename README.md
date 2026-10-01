@@ -113,7 +113,7 @@ Alternativas sem Node.js:
 
 ```bash
 npm run build      # gera a pasta dist/, pronta para publicar
-npm run preview    # serve a pasta dist/ em http://localhost:8080/
+npm run preview    # serve a pasta dist/ em http://localhost:8080/, com gzip
 ```
 
 O build (`ferramentas/build.js`) usa o **esbuild** como bundler:
@@ -141,6 +141,30 @@ No total, o HTML, o CSS e o JavaScript do projeto caem de 124,8 KB para 72,1 KB 
 21,6 KB com a compressão gzip feita pelo servidor. A primeira visita baixa menos de 100 KB, e os
 testes do build conferem esse orçamento. A pasta `dist/` não é versionada: ela é gerada a cada
 build e no deploy.
+
+### Medição com o Lighthouse
+
+Comparação entre a v1.2.2 (antes do build e da otimização das imagens) e o build da v1.3.2,
+servidos pelo `servidor.js` com gzip, como no GitHub Pages. Lighthouse 13.5, página inicial,
+mediana de 5 execuções:
+
+| Métrica | Celular (4G lento simulado) | Computador |
+|---|---|---|
+| LCP (maior conteúdo visível) | 1,74 s → 1,35 s (−22%) | 0,45 s → 0,36 s (−21%) |
+| FCP (primeiro conteúdo) | 1,12 s → 1,12 s | 0,33 s → 0,31 s |
+| CLS (mudança de layout) | 0,15 → 0 | 0,76 → 0 |
+| Peso da página | 68,2 KB → 32,6 KB (−52%) | 71,7 KB → 34,6 KB (−52%) |
+| Requisições | 29 → 7 | 30 → 8 |
+| Pontuação de desempenho | 93 → 100 | 76 → 100 |
+
+O maior ganho vem de trocar os 22 módulos JavaScript, baixados em cadeia (cada `import` só é
+descoberto depois que o arquivo anterior chega, em até 6 níveis), por um único arquivo: a cadeia
+de requisições cai para 2 níveis, e cada nível a menos economiza uma ida e volta na rede. O CLS
+vinha do rodapé, que aparecia logo abaixo do "Carregando…" e pulava quando o conteúdo chegava;
+agora o `<main>` tem altura mínima de uma tela.
+
+Para repetir a medição: `npm run build`, `npm run preview` e, no Chrome, **DevTools > Lighthouse**
+com a categoria Performance (ou `npx lighthouse http://localhost:8080/`).
 
 ### Imagens
 
@@ -229,9 +253,10 @@ GitHub Pages, o que garante que nenhum endereço dependa da raiz do domínio.
   (erros, modal, menu do celular, alto contraste), marcos, ordem do Tab e contorno de foco em cada
   parada, submenu pelo teclado, foco ao fechar alertas, nomes acessíveis e preferências visuais;
 - `desempenho.spec.js`: imagens em AVIF com `width` e `height`, prioridade da imagem principal,
-  versão da imagem principal escolhida pelo `srcset` (celular 1x e 2x e notebook) e, só no build,
-  arquivos minificados com hash no nome e o orçamento de tamanho (JS abaixo de 50 KB, CSS abaixo
-  de 30 KB e primeira visita abaixo de 100 KB).
+  versão da imagem principal escolhida pelo `srcset` (celular 1x e 2x e notebook), layout estável
+  durante o carregamento (CLS abaixo de 0,1) e, só no build, arquivos minificados, com hash no
+  nome e servidos com gzip, e o orçamento de tamanho (JS abaixo de 50 KB, CSS abaixo de 30 KB e
+  primeira visita abaixo de 100 KB).
 
 Comandos úteis:
 
