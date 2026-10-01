@@ -141,8 +141,8 @@ site como uma pessoa usaria:
 - `grafico.spec.js`: carregamento sob demanda do Chart.js, destruição do gráfico ao sair da página
   e tabela alternativa quando a biblioteca não carrega;
 - `acessibilidade.spec.js`: auditoria da WCAG 2.1 AA com o axe-core em todas as rotas e estados
-  (erros, modal, menu do celular, alto contraste), marcos, submenu pelo teclado, foco ao fechar
-  alertas, nomes acessíveis do formulário e preferências visuais.
+  (erros, modal, menu do celular, alto contraste), marcos, ordem do Tab e contorno de foco em cada
+  parada, submenu pelo teclado, foco ao fechar alertas, nomes acessíveis e preferências visuais.
 
 Comandos úteis:
 
@@ -316,9 +316,17 @@ testes de ponta a ponta (`testes/e2e/acessibilidade.spec.js`) e manualmente, com
 
 **Teclado e foco**
 
-- Link "Pular para o conteúdo" e foco sempre visível com `:focus-visible` (contorno de 3px).
+- Link "Pular para o conteúdo" e foco sempre visível com `:focus-visible`: contorno de 3px em todo
+  elemento focável, com contraste de pelo menos 3:1 sobre o fundo (branco no cabeçalho e no rodapé
+  verdes, amarelo no alto contraste). Os testes percorrem cada tela com Tab e conferem cada parada.
+- A ordem do Tab segue a ordem visual: barra de acessibilidade, menu, conteúdo e rodapé.
+- O botão "Enviar cadastro" usa `aria-disabled` em vez de `disabled`: continua no Tab, é anunciado
+  como indisponível junto com a dica e, se acionado sem o aceite, leva o foco até ele.
 - A cada troca de rota, o foco vai para o título da página; ao fechar um alerta, para o título da
-  seção; ao fechar o modal do cadastro, para o histórico (`js/modules/foco.js`).
+  seção; ao fechar o modal do cadastro, para o histórico; ao apagar o histórico ou descartar o
+  rascunho, para o título da página (`js/modules/foco.js`).
+- Nomes acessíveis distintos: o botão de fechar de cada alerta inclui o título do alerta, e links
+  com o mesmo texto levam ao mesmo destino.
 - Esc fecha o menu, o submenu e os modais. Os toasts não somem enquanto o mouse ou o foco
   estiverem sobre eles.
 

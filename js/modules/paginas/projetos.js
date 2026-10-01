@@ -61,7 +61,7 @@ export default {
           <h3>Áreas de voluntariado disponíveis</h3>
           <ul>${areas}</ul>
         </article>
-        <p><a class="botao" href="#/cadastro">Quero ser voluntário</a></p>
+        <p><a class="botao" href="#/cadastro">Fazer meu cadastro</a></p>
       </section>
 
       <section id="campanhas">

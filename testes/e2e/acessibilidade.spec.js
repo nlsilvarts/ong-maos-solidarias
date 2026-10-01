@@ -237,3 +237,115 @@ test.describe("Alto contraste", () => {
     expect(await fundo("Texto maior")).not.toBe(await fundo("Alto contraste"));
   });
 });
+
+test.describe("Teclado e leitores de tela", () => {
+  /* Avalia o elemento com foco: contorno e contraste do contorno com o fundo onde ele é desenhado,
+     logo fora das quatro bordas do elemento (vale o pior lado) */
+  const avaliarFoco = () => {
+    const elemento = document.activeElement;
+    if (!elemento || elemento === document.body) return null;
+    const rgb = (cor) => (cor.match(/[\d.]+/g) || []).map(Number);
+    const luminancia = ([r, g, b]) => {
+      const canal = (c) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+      return 0.2126 * canal(r) + 0.7152 * canal(g) + 0.0722 * canal(b);
+    };
+    const estilo = getComputedStyle(elemento);
+    const caixa = elemento.getBoundingClientRect();
+    const d = parseFloat(estilo.outlineOffset) + parseFloat(estilo.outlineWidth) / 2;
+    const limitar = (valor, maximo) => Math.min(Math.max(valor, 0), maximo - 1);
+    const pontos = [
+      [caixa.left - d, caixa.top + caixa.height / 2], [caixa.right + d, caixa.top + caixa.height / 2],
+      [caixa.left + caixa.width / 2, caixa.top - d], [caixa.left + caixa.width / 2, caixa.bottom + d]
+    ];
+    const contorno = luminancia(rgb(estilo.outlineColor));
+    const contrastes = pontos.map(([x, y]) => {
+      const fora = document.elementsFromPoint(limitar(x, innerWidth), limitar(y, innerHeight))
+        .find((no) => no !== elemento && !elemento.contains(no));
+      let fundo = [255, 255, 255];
+      for (let no = fora; no; no = no.parentElement) {
+        const cor = rgb(getComputedStyle(no).backgroundColor);
+        if (cor.length === 3 || cor[3] > 0.5) { fundo = cor.slice(0, 3); break; }
+      }
+      const atras = luminancia(fundo);
+      return (Math.max(contorno, atras) + 0.05) / (Math.min(contorno, atras) + 0.05);
+    });
+    return {
+      nome: (elemento.getAttribute("aria-label") || elemento.textContent || elemento.id).trim().slice(0, 40),
+      estilo: estilo.outlineStyle,
+      largura: parseFloat(estilo.outlineWidth),
+      contraste: Math.min(...contrastes)
+    };
+  };
+
+  const casos = [["inicio", false], ["projetos", false], ["cadastro", false], ["componentes", false], ["inicio", true], ["cadastro", true]];
+  for (const [rota, altoContraste] of casos) {
+    test(`#/${rota}${altoContraste ? " em alto contraste" : ""}: todo item do Tab tem contorno de foco visível (3:1 ou mais)`, async ({ page }) => {
+      if (altoContraste) {
+        await page.addInitScript(() => localStorage.setItem("ong-maos-solidarias:preferencias", '{"textoGrande":false,"altoContraste":true}'));
+      }
+      await page.goto(`${PAGINA}#/${rota}`);
+      await expect(page.locator("main h1")).toBeVisible();
+      const problemas = [];
+      let paradas = 0;
+      for (let i = 0; i < 60; i += 1) {
+        await page.keyboard.press("Tab");
+        const foco = await page.evaluate(avaliarFoco);
+        if (!foco) break;
+        paradas += 1;
+        if (foco.estilo === "none" || foco.largura < 2 || foco.contraste < 3) {
+          problemas.push(`${foco.nome}: ${foco.estilo} ${foco.largura}px, ${foco.contraste.toFixed(1)}:1`);
+        }
+        if (await page.evaluate(() => document.activeElement.closest("footer") && !document.activeElement.parentElement.nextElementSibling)) break;
+      }
+      expect(paradas).toBeGreaterThan(5);
+      expect(problemas).toEqual([]);
+    });
+  }
+
+  test("o botão Enviar continua no Tab, é anunciado como indisponível e leva ao aceite", async ({ page }) => {
+    await page.goto(`${PAGINA}#/cadastro`);
+    await page.locator("#mensagem").focus();
+    await page.keyboard.press("Tab");
+    await expect(page.locator("#aceite")).toBeFocused();
+    await page.keyboard.press("Tab");
+
+    const enviar = page.getByRole("button", { name: "Enviar cadastro" });
+    await expect(enviar).toBeFocused();
+    await expect(enviar).toHaveAttribute("aria-disabled", "true");
+    await expect(enviar).toHaveAccessibleDescription("Para enviar, é preciso aceitar o uso dos dados conforme a LGPD.");
+
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#aceite")).toBeFocused();
+    await expect(page.locator("#alerta-erro")).toBeHidden();
+  });
+
+  test("botões e links têm nomes que não se repetem com destinos diferentes", async ({ page }) => {
+    await page.goto(`${PAGINA}#/componentes`);
+    const fechar = page.getByRole("button", { name: /^Fechar aviso: / });
+    await expect(fechar).toHaveCount(2);
+    expect(new Set(await fechar.evaluateAll((botoes) => botoes.map((b) => b.getAttribute("aria-label")))).size).toBe(2);
+
+    await page.goto(`${PAGINA}#/projetos`);
+    await expect(page.getByRole("link", { name: "Quero ser voluntário" })).toHaveCount(1);
+    await expect(page.getByRole("link", { name: "Fazer meu cadastro" })).toHaveAttribute("href", "#/cadastro");
+  });
+
+  test("Apagar histórico e Descartar rascunho levam o foco ao título da página", async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem("ong-maos-solidarias:cadastros-enviados", JSON.stringify([{ primeiroNome: "Ana", participacao: "doador", enviadoEm: "2026-09-30T12:00:00.000Z" }]));
+      localStorage.setItem("ong-maos-solidarias:rascunho-cadastro", JSON.stringify({ campos: { nome: "Bia Lima" }, areas: [], salvoEm: "2026-09-30T12:00:00.000Z" }));
+    });
+    await page.goto(`${PAGINA}#/cadastro`);
+    const titulo = page.locator("main h1");
+
+    await page.getByRole("button", { name: "Apagar histórico" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#historico-cadastros")).toBeHidden();
+    await expect(titulo).toBeFocused();
+
+    await page.getByRole("button", { name: "Descartar rascunho" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#aviso-rascunho")).toBeHidden();
+    await expect(titulo).toBeFocused();
+  });
+});
