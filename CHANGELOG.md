@@ -4,6 +4,21 @@ Todas as mudanças importantes do projeto são registradas aqui.
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e as versões seguem o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.2.2] - 2026-10-01
+
+### Adicionado
+- Verificação do contraste das cores do Design System (`npm run contraste`): mostra a relação
+  de cada par de cores do site, no modo normal e no alto contraste, calculada com a fórmula da
+  WCAG. O teste de unidade falha se um par ficar abaixo do mínimo: 4,5:1 para texto, 3:1 para
+  bordas, ícones, contorno de foco e gráfico, e 7:1 para texto no alto contraste.
+
+### Alterado
+- A cor do botão desabilitado no alto contraste virou a variável `--hc-desabilitado`.
+
+### Removido
+- A variável `--cor-borda` (#bbbbbb), que não era mais usada: a borda dos campos usa
+  `--cor-borda-campo` (#767676, 4,54:1 sobre o branco).
+
 ## [1.2.1] - 2026-10-01
 
 ### Corrigido
@@ -86,6 +101,7 @@ e as versões seguem o [Versionamento Semântico](https://semver.org/lang/pt-BR/
 - Formulário dividido em módulos com responsabilidade única (`campos.js`, `resumo-erros.js`
   e o controlador `formulario.js`).
 
+[1.2.2]: ../../compare/v1.2.1...v1.2.2
 [1.2.1]: ../../compare/v1.2.0...v1.2.1
 [1.2.0]: ../../compare/v1.1.0...v1.2.0
 [1.1.0]: ../../compare/v1.0.1...v1.1.0
