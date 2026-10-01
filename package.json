@@ -2,8 +2,14 @@
   "name": "ong-maos-solidarias",
   "version": "1.0.1",
   "private": true,
+  "type": "module",
   "description": "Site da ONG Mãos Solidárias (SPA em HTML, CSS e JavaScript puro).",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
+    "start": "node ferramentas/servidor.js",
+    "build": "npm run build:vendor",
     "build:vendor": "esbuild ferramentas/chart-entrada.js --bundle --format=esm --minify --legal-comments=eof --outfile=js/vendor/chart.esm.js"
   },
   "devDependencies": {
