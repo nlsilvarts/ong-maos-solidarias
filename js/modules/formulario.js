@@ -140,14 +140,18 @@ export function iniciarFormulario(formulario) {
     }, 0);
   });
 
+  // Os dois botões abaixo somem depois de usados (o aviso e o histórico ficam ocultos).
+  // Para o foco não se perder, ele vai para o título da página antes da notificação
   document.getElementById("botao-descartar-rascunho").addEventListener("click", () => {
     formulario.reset();
+    focar(document.querySelector("main h1"));
     mostrarToast("Rascunho descartado.", "info");
   });
 
   document.getElementById("botao-apagar-historico").addEventListener("click", () => {
     apagarHistorico();
     mostrarHistorico();
+    focar(document.querySelector("main h1"));
     mostrarToast("Histórico de cadastros apagado.", "info");
   });
 

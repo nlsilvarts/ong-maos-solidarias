@@ -55,7 +55,7 @@ export function alerta({ tipo = "info", titulo, texto, fechavel = false, id = ""
         <p${id ? ` id="${id}-texto"` : ""}>${escapar(texto)}</p>
         ${acao ? `<p class="alerta-acao"><button type="button" class="botao botao-pequeno botao-secundario" id="${acao.id}">${escapar(acao.texto)}</button></p>` : ""}
       </div>
-      ${fechavel ? '<button type="button" class="botao-fechar" aria-label="Fechar aviso">×</button>' : ""}
+      ${fechavel ? `<button type="button" class="botao-fechar" aria-label="Fechar aviso: ${escapar(titulo)}">×</button>` : ""}
     </div>`;
 }
 

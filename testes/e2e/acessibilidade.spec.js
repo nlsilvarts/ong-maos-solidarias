@@ -318,4 +318,34 @@ test.describe("Teclado e leitores de tela", () => {
     await expect(page.locator("#aceite")).toBeFocused();
     await expect(page.locator("#alerta-erro")).toBeHidden();
   });
+
+  test("botões e links têm nomes que não se repetem com destinos diferentes", async ({ page }) => {
+    await page.goto(`${PAGINA}#/componentes`);
+    const fechar = page.getByRole("button", { name: /^Fechar aviso: / });
+    await expect(fechar).toHaveCount(2);
+    expect(new Set(await fechar.evaluateAll((botoes) => botoes.map((b) => b.getAttribute("aria-label")))).size).toBe(2);
+
+    await page.goto(`${PAGINA}#/projetos`);
+    await expect(page.getByRole("link", { name: "Quero ser voluntário" })).toHaveCount(1);
+    await expect(page.getByRole("link", { name: "Fazer meu cadastro" })).toHaveAttribute("href", "#/cadastro");
+  });
+
+  test("Apagar histórico e Descartar rascunho levam o foco ao título da página", async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem("ong-maos-solidarias:cadastros-enviados", JSON.stringify([{ primeiroNome: "Ana", participacao: "doador", enviadoEm: "2026-09-30T12:00:00.000Z" }]));
+      localStorage.setItem("ong-maos-solidarias:rascunho-cadastro", JSON.stringify({ campos: { nome: "Bia Lima" }, areas: [], salvoEm: "2026-09-30T12:00:00.000Z" }));
+    });
+    await page.goto(`${PAGINA}#/cadastro`);
+    const titulo = page.locator("main h1");
+
+    await page.getByRole("button", { name: "Apagar histórico" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#historico-cadastros")).toBeHidden();
+    await expect(titulo).toBeFocused();
+
+    await page.getByRole("button", { name: "Descartar rascunho" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#aviso-rascunho")).toBeHidden();
+    await expect(titulo).toBeFocused();
+  });
 });

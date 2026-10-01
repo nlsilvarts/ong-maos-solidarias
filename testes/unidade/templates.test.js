@@ -39,7 +39,7 @@ describe("alerta()", () => {
 
   it("inclui o botão de fechar e o botão de ação quando pedidos", () => {
     const html = alerta({ titulo: "Rascunho", texto: "Recuperado.", fechavel: true, acao: { texto: "Descartar", id: "botao-descartar" } });
-    assert.match(html, /aria-label="Fechar aviso"/);
+    assert.match(html, /aria-label="Fechar aviso: Rascunho"/);
     assert.match(html, /id="botao-descartar"/);
   });
 });
