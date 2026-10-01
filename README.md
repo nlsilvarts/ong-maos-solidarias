@@ -11,17 +11,18 @@ recarregar o navegador e sem framework.
 3. [Pré-requisitos](#pré-requisitos)
 4. [Instalação](#instalação)
 5. [Como executar](#como-executar)
-6. [Build](#build)
+6. [Build de produção](#build-de-produção)
 7. [Testes](#testes)
-8. [Estrutura de pastas](#estrutura-de-pastas)
-9. [Arquitetura](#arquitetura)
-10. [Rotas](#rotas)
-11. [Formulário de cadastro](#formulário-de-cadastro)
-12. [Dados salvos no navegador](#dados-salvos-no-navegador)
-13. [Gráfico com Chart.js](#gráfico-com-chartjs)
-14. [Componentes de feedback](#componentes-de-feedback)
-15. [Acessibilidade](#acessibilidade)
-16. [Versionamento e contribuição](#versionamento-e-contribuição)
+8. [Deploy](#deploy)
+9. [Estrutura de pastas](#estrutura-de-pastas)
+10. [Arquitetura](#arquitetura)
+11. [Rotas](#rotas)
+12. [Formulário de cadastro](#formulário-de-cadastro)
+13. [Dados salvos no navegador](#dados-salvos-no-navegador)
+14. [Gráfico com Chart.js](#gráfico-com-chartjs)
+15. [Componentes de feedback](#componentes-de-feedback)
+16. [Acessibilidade](#acessibilidade)
+17. [Versionamento e contribuição](#versionamento-e-contribuição)
 
 ## Visão geral
 
@@ -53,13 +54,16 @@ O projeto não tem back-end: o envio do cadastro é simulado no próprio navegad
 | CSS3 | — | Design System em variáveis, Grid de 12 colunas, Flexbox e media queries mobile-first |
 | JavaScript (ES Modules) | ES2020 | Roteador, templates, validação, máscaras e persistência, sem framework |
 | [Chart.js](https://www.chartjs.org/) | 4.5.1 | Gráfico de barras das campanhas |
-| [esbuild](https://esbuild.github.io/) | 0.28.2 | Empacota o Chart.js em um único arquivo local |
+| [esbuild](https://esbuild.github.io/) | 0.28.2 | Bundler: build de produção (JS e CSS minificados) e pacote local do Chart.js |
+| [html-minifier-terser](https://github.com/terser/html-minifier-terser) | 7.2.0 | Minificação do HTML no build |
+| [sharp](https://sharp.pixelplumbing.com/) | 0.35.5 | Otimização das imagens (JPG, PNG, WebP e AVIF) |
 | [Node.js](https://nodejs.org/) e npm | 20 ou superior | Servidor local, build e testes |
 | `node:test` | nativo do Node.js | Testes de unidade |
 | [Playwright](https://playwright.dev/) | 1.56.0 | Testes de ponta a ponta no Chromium |
 | [axe-core](https://github.com/dequelabs/axe-core) | 4.13.0 | Auditoria automática da WCAG 2.1 AA nos testes |
 | [W3C Nu Html Checker](https://validator.w3.org/nu/) | — | Validação do HTML e do CSS |
 | Git | — | Versionamento com GitFlow e Conventional Commits |
+| GitHub Actions e GitHub Pages | — | Testes a cada push e pull request e deploy do build de produção |
 
 ## Pré-requisitos
 
@@ -76,7 +80,7 @@ O projeto não tem back-end: o envio do cadastro é simulado no próprio navegad
 ```bash
 git clone <endereço-do-repositório>
 cd ong-maos-solidarias
-npm install                        # Chart.js, esbuild, Playwright e axe-core (dependências de desenvolvimento)
+npm install                        # dependências de desenvolvimento: esbuild, sharp, Playwright...
 npx playwright install chromium    # navegador usado nos testes de ponta a ponta
 ```
 
@@ -84,7 +88,7 @@ Para instalar exatamente as versões registradas no `package-lock.json` (por exe
 contínua), use `npm ci` no lugar de `npm install`.
 
 O site em si não depende de nenhum pacote: o Chart.js já está empacotado em `js/vendor/`. As
-dependências do npm servem para gerar esse pacote e rodar os testes.
+dependências do npm servem para o build de produção, a otimização das imagens e os testes.
 
 ## Como executar
 
@@ -105,35 +109,98 @@ Alternativas sem Node.js:
 > Abrir o `index.html` direto do disco (`file://`) não funciona, porque os navegadores bloqueiam
 > módulos JavaScript nesse modo. Nesse caso, a página mostra um aviso com estas instruções.
 
-## Build
+## Build de produção
 
 ```bash
-npm run build
+npm run build      # gera a pasta dist/, pronta para publicar
+npm run preview    # serve a pasta dist/ em http://localhost:8080/
+```
+
+O build (`ferramentas/build.js`) usa o **esbuild** como bundler:
+
+- **JavaScript:** parte de `js/main.js`, junta os 22 módulos em um único arquivo e separa o Chart.js
+  em outro, baixado só quando o gráfico aparece (code splitting do `import()`). O código é
+  minificado (sem espaços e comentários, com nomes encurtados) para os navegadores com suporte ao
+  `<dialog>`: Chrome e Edge 98, Firefox 98 e Safari 15.4.
+- **CSS:** `reset.css` e `style.css` viram uma única folha de estilo minificada.
+- **HTML:** o `index.html` passa a apontar para os arquivos gerados e é minificado pelo
+  **html-minifier-terser** (espaços, comentários e os scripts do `<head>`).
+- Os arquivos de `assets/` levam um hash do conteúdo no nome (`main-[hash].js`): quando o conteúdo
+  muda, o nome muda, e o navegador não usa uma cópia velha do cache. Mapas de código (`.map`)
+  acompanham o JS e o CSS, para depuração.
+- As imagens, já otimizadas, são copiadas para `dist/imagens/`.
+
+| Arquivo em `dist/` | Original | Minificado | Com gzip |
+|---|---|---|---|
+| `index.html` | 5,5 KB | 3,7 KB (−33%) | 1,6 KB |
+| `assets/estilos-[hash].css` | 42,1 KB | 26,4 KB (−37%) | 5,7 KB |
+| `assets/main-[hash].js` | 77,2 KB | 42,1 KB (−45%) | 14,3 KB |
+| `assets/chart.esm-[hash].js` | 148,1 KB (já minificado) | 148,2 KB | 51,6 KB |
+
+No total, o HTML, o CSS e o JavaScript do projeto caem de 124,8 KB para 72,1 KB (−42%), e para
+21,6 KB com a compressão gzip feita pelo servidor. A primeira visita baixa menos de 100 KB, e os
+testes do build conferem esse orçamento. A pasta `dist/` não é versionada: ela é gerada a cada
+build e no deploy.
+
+### Imagens
+
+```bash
+npm run imagens
+```
+
+O `ferramentas/imagens.js` usa o **sharp** para gerar, a partir dos originais de
+`imagens/originais/`, as versões usadas pelo site, no tamanho em que aparecem e sem metadados:
+
+| Imagem | Original | JPG/PNG otimizado | WebP | AVIF |
+|---|---|---|---|---|
+| `logo.png` | 7,2 KB | 2,0 KB (−72%) | 1,7 KB (−76%) | — |
+| `projeto-alimentos.jpg` | 8,4 KB | 6,7 KB (−20%) | 3,1 KB (−63%) | 1,8 KB (−78%) |
+| `projeto-educacao.jpg` | 9,5 KB | 7,4 KB (−21%) | 3,0 KB (−68%) | 2,2 KB (−76%) |
+| `projeto-meio-ambiente.jpg` | 8,1 KB | 6,2 KB (−24%) | 3,4 KB (−59%) | 2,8 KB (−66%) |
+| `voluntarios.jpg` | 14,6 KB | 11,0 KB (−25%) | 5,2 KB (−64%) | 3,5 KB (−76%) |
+
+- Ilustrações: JPG progressivo com o codificador mozjpeg (qualidade 75), WebP (qualidade 75) e AVIF
+  (qualidade 50). O `<picture>` oferece o AVIF, depois o WebP, e deixa o JPG como alternativa.
+- Logotipo: PNG com paleta de até 256 cores e WebP sem perdas feito a partir dela. O AVIF ficava
+  maior que o WebP e não é usado.
+- As imagens têm `width` e `height` (o espaço fica reservado e o layout não salta),
+  `loading="lazy"` fora do topo da página e `fetchpriority="high"` na imagem principal do início.
+
+As versões geradas são versionadas, e o build só as copia. Rode `npm run imagens` ao trocar um
+original.
+
+### Pacote do Chart.js
+
+```bash
+npm run build:vendor
 ```
 
 Gera de novo o arquivo `js/vendor/chart.esm.js` com o esbuild: o Chart.js 4.5.1 vira um único
 ES Module minificado (cerca de 148 KB), só com os componentes do gráfico de barras listados em
 `ferramentas/chart-entrada.js`. A licença MIT do Chart.js fica no fim do arquivo.
 
-O arquivo gerado é versionado para que o site funcione sem Node.js e sem CDN. Rode o build apenas
-ao atualizar o Chart.js ou mudar os componentes importados. HTML, CSS e o restante do JavaScript
-não passam por build: são servidos como estão.
+O arquivo gerado é versionado para que o site funcione sem CDN, inclusive em desenvolvimento, sem
+build. Rode este comando apenas ao atualizar o Chart.js ou mudar os componentes importados.
 
 ## Testes
 
 | Comando | O que executa | Ferramenta |
 |---|---|---|
 | `npm test` | Testes de unidade, sem navegador | `node:test`, nativo do Node.js |
-| `npm run test:e2e` | Testes de ponta a ponta no Chromium | Playwright |
+| `npm run test:e2e` | Testes de ponta a ponta no Chromium, no código-fonte | Playwright |
+| `npm run test:e2e:producao` | Os mesmos testes no build de produção (gera o build antes) | Playwright |
 | `npm run contraste` | Tabela de contraste de cada par de cores do Design System | `ferramentas/contraste.js` (fórmula da WCAG) |
 
 **Unidade (`testes/unidade/`):** regras de validação (CPF, idade, telefone, CEP e demais campos),
 máscaras, templates (inclusive o `escapar()` contra HTML injetado), percentual das campanhas,
-leitura e gravação no localStorage (com um armazenamento em memória), histórico de envios e
-contraste de cada par de cores do site, no modo normal e no alto contraste.
+leitura e gravação no localStorage (com um armazenamento em memória), histórico de envios,
+contraste de cada par de cores do site, no modo normal e no alto contraste, e imagens otimizadas
+(cada versão com as dimensões do original e menor que ele).
 
 **Ponta a ponta (`testes/e2e/`):** o Playwright inicia o servidor local, abre o Chromium e usa o
-site como uma pessoa usaria:
+site como uma pessoa usaria. Os testes rodam em dois projetos: `desenvolvimento`, com o
+código-fonte, e `producao`, com a pasta `dist/` servida em `/ong-maos-solidarias/`, como no
+GitHub Pages, o que garante que nenhum endereço dependa da raiz do domínio.
 
 - `navegacao.spec.js`: rotas, título da aba, foco, Voltar e Avançar, página não encontrada,
   link "Pular para o conteúdo" e menu no celular;
@@ -144,7 +211,10 @@ site como uma pessoa usaria:
   e tabela alternativa quando a biblioteca não carrega;
 - `acessibilidade.spec.js`: auditoria da WCAG 2.1 AA com o axe-core em todas as rotas e estados
   (erros, modal, menu do celular, alto contraste), marcos, ordem do Tab e contorno de foco em cada
-  parada, submenu pelo teclado, foco ao fechar alertas, nomes acessíveis e preferências visuais.
+  parada, submenu pelo teclado, foco ao fechar alertas, nomes acessíveis e preferências visuais;
+- `desempenho.spec.js`: imagens em AVIF com `width` e `height`, prioridade da imagem principal e,
+  só no build, arquivos minificados com hash no nome e o orçamento de tamanho (JS abaixo de 50 KB,
+  CSS abaixo de 30 KB e primeira visita abaixo de 100 KB).
 
 Comandos úteis:
 
@@ -155,9 +225,30 @@ npx playwright show-report                         # abre o relatório da últim
 ```
 
 **Validação W3C:** o `html/index.html`, o HTML gerado por cada rota e os dois arquivos CSS foram
-validados no [W3C Nu Html Checker](https://validator.w3.org/nu/), sem erros. Para conferir o HTML
+validados no [W3C Nu Html Checker](https://validator.w3.org/nu/), sem erros, assim como o
+`index.html` e o CSS minificados do build. Para conferir o HTML
 gerado por uma rota, copie o elemento `<html>` no DevTools (Copy outerHTML) e cole na opção
 "Text input" do validador.
+
+## Deploy
+
+O site é publicado no **GitHub Pages** pelo **GitHub Actions**, com o workflow
+`.github/workflows/deploy.yml`:
+
+1. A cada push na `main` e a cada pull request, o workflow instala as dependências com `npm ci`
+   (versões exatas do `package-lock.json`), roda os testes de unidade, a verificação de contraste, o
+   build de produção e os testes de ponta a ponta no código-fonte e no build.
+2. Se tudo passar e o push for na `main`, a pasta `dist/` é empacotada
+   (`actions/upload-pages-artifact`) e publicada (`actions/deploy-pages`). Nos pull requests, o
+   workflow só testa; se um teste falhar, nada é publicado.
+3. O site fica em `https://<seu-usuario>.github.io/ong-maos-solidarias/`. Como a navegação usa o
+   hash (`#/projetos`) e todos os caminhos do build são relativos, ele funciona nesse subcaminho
+   sem nenhuma configuração de servidor. O GitHub Pages serve os arquivos por HTTPS e com
+   compressão gzip.
+
+Configuração, uma única vez, no repositório do GitHub: **Settings > Pages > Build and deployment >
+Source: GitHub Actions**. Para publicar de novo sem um novo commit, use **Actions > Testes e deploy
+> Run workflow**.
 
 ## Estrutura de pastas
 
@@ -165,12 +256,16 @@ gerado por uma rota, copie o elemento `<html>` no DevTools (Copy outerHTML) e co
 ong-maos-solidarias/
 ├── README.md                 Esta documentação
 ├── CHANGELOG.md              Histórico de versões
-├── package.json              Scripts (start, build, test, test:e2e, contraste) e dependências de desenvolvimento
+├── package.json              Scripts (start, build, preview, imagens, test, test:e2e...) e dependências de desenvolvimento
 ├── package-lock.json         Versões exatas das dependências instaladas
 ├── playwright.config.js      Configuração dos testes de ponta a ponta
-├── .gitignore                Arquivos fora do repositório (node_modules, relatórios de teste)
+├── .gitignore                Arquivos fora do repositório (node_modules, dist, relatórios de teste)
+├── .github/workflows/
+│   └── deploy.yml            Testes e deploy no GitHub Pages (GitHub Actions)
 ├── ferramentas/
-│   ├── servidor.js           Servidor local sem dependências (npm start)
+│   ├── servidor.js           Servidor local sem dependências (npm start e npm run preview)
+│   ├── build.js              Build de produção com esbuild e html-minifier-terser (npm run build)
+│   ├── imagens.js            Otimização das imagens com sharp (npm run imagens)
 │   ├── contraste.js          Contraste das cores do Design System pela fórmula da WCAG (npm run contraste)
 │   └── chart-entrada.js      Entrada do pacote do Chart.js (só os componentes usados)
 ├── html/
@@ -209,7 +304,9 @@ ong-maos-solidarias/
 ├── testes/
 │   ├── unidade/              Testes de unidade (*.test.js), executados com node:test
 │   └── e2e/                  Testes de ponta a ponta (*.spec.js), executados com Playwright
-└── imagens/                  Imagens otimizadas em dois formatos (JPG/PNG + WebP)
+├── imagens/                  Imagens otimizadas (JPG/PNG, WebP e AVIF), usadas pelo site
+│   └── originais/            Originais das imagens, que não vão para o site
+└── dist/                     Build de produção (gerado por npm run build, fora do Git)
 ```
 
 ## Arquitetura
@@ -273,7 +370,7 @@ entrar no HTML.
 ## Gráfico com Chart.js
 
 O gráfico "Quanto já arrecadamos" (página de projetos) usa o **Chart.js 4.5.1**, instalado pelo
-npm e empacotado com o **esbuild** em um único ES Module local (veja [Build](#build)). Assim o site
+npm e empacotado com o **esbuild** em um único ES Module local (veja [Pacote do Chart.js](#pacote-do-chartjs)). Assim o site
 não depende de CDN e funciona offline.
 
 - A biblioteca é carregada sob demanda, com `import()`, só quando a página de projetos é aberta.
@@ -369,8 +466,10 @@ Fluxo de uma nova funcionalidade:
 ```bash
 git checkout develop
 git checkout -b feature/nome-da-funcionalidade
-# ...commits...
-npm test && npm run test:e2e      # os testes precisam passar antes do merge
+# ...commits... (os testes precisam passar antes do merge)
+npm test                          # unidade
+npm run test:e2e                  # ponta a ponta no código-fonte
+npm run test:e2e:producao         # ponta a ponta no build de produção
 git checkout develop
 git merge --no-ff feature/nome-da-funcionalidade
 ```
@@ -385,6 +484,7 @@ As mensagens de commit seguem o Conventional Commits, no formato `tipo(escopo): 
 | `test` | Testes automatizados | `test: adiciona testes de ponta a ponta com Playwright` |
 | `docs` | Documentação | `docs: documenta estrutura, execução, módulos e versionamento no README` |
 | `build` | Dependências, empacotamento e ferramentas | `build: empacota o Chart.js 4.5.1 com esbuild` |
+| `ci` | Integração contínua e deploy | `ci: testa o projeto e publica o build no GitHub Pages com GitHub Actions` |
 | `chore` | Tarefas de manutenção e versões | `chore(release): prepara a versão 1.0.0` |
 
 As versões seguem o Versionamento Semântico (MAIOR.MENOR.CORREÇÃO), e as mudanças de cada versão
