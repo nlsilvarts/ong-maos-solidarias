@@ -22,12 +22,16 @@ export function numero(valor) {
   return valor.toLocaleString("pt-BR");
 }
 
-/* Imagem em dois formatos: WebP quando o navegador aceita, JPG como alternativa */
+/* Imagem em três formatos (gerados por ferramentas/imagens.js): o navegador usa o primeiro
+   que aceitar, AVIF ou WebP, e o JPG fica como alternativa. A imagem do topo da página
+   (carregamento "eager") também ganha prioridade alta no download */
 export function imagem({ arquivo, alt, largura, altura }, { carregamento = "lazy" } = {}) {
+  const prioridade = carregamento === "eager" ? ' fetchpriority="high"' : "";
   return `
     <picture>
+      <source srcset="${PASTA_IMAGENS}${arquivo}.avif" type="image/avif">
       <source srcset="${PASTA_IMAGENS}${arquivo}.webp" type="image/webp">
-      <img src="${PASTA_IMAGENS}${arquivo}.jpg" alt="${escapar(alt)}" width="${largura}" height="${altura}" loading="${carregamento}">
+      <img src="${PASTA_IMAGENS}${arquivo}.jpg" alt="${escapar(alt)}" width="${largura}" height="${altura}" loading="${carregamento}"${prioridade}>
     </picture>`;
 }
 
