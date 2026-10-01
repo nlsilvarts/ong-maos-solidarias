@@ -85,6 +85,7 @@ export default {
             <summary>Ver os dados em tabela</summary>
             <div class="tabela-rolavel">
               <table>
+                <caption class="visualmente-oculto">Arrecadação de cada campanha em relação à meta</caption>
                 <thead>
                   <tr>
                     <th scope="col">Campanha</th>

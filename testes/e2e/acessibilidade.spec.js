@@ -76,6 +76,15 @@ test.describe("WCAG 2.1 AA (axe-core)", () => {
 });
 
 test.describe("Semântica, teclado e WAI-ARIA", () => {
+  test("a página tem os marcos banner, navegação, região de acessibilidade, principal e rodapé", async ({ page }) => {
+    await page.goto(PAGINA);
+    await expect(page.getByRole("banner")).toHaveCount(1);
+    await expect(page.getByRole("navigation", { name: "Menu principal" })).toHaveCount(1);
+    await expect(page.getByRole("region", { name: "Recursos de acessibilidade" })).toHaveCount(1);
+    await expect(page.getByRole("main")).toHaveCount(1);
+    await expect(page.getByRole("contentinfo")).toHaveCount(1);
+  });
+
   test("submenu: abre com Enter, é percorrido com Tab e fecha com Esc, devolvendo o foco ao botão", async ({ page }) => {
     await page.goto(PAGINA);
     const botao = page.getByRole("button", { name: "Seções de Projetos" });
@@ -133,5 +142,27 @@ test.describe("Semântica, teclado e WAI-ARIA", () => {
     await page.mouse.move(0, 0);
     await page.clock.runFor(6000);
     await expect(toast).toHaveCount(0);
+  });
+
+  test("formulário: nomes acessíveis sem o asterisco e grupo de rádios obrigatório", async ({ page }) => {
+    await page.goto(`${PAGINA}#/cadastro`);
+    await expect(page.getByRole("textbox", { name: "Nome completo", exact: true })).toBeVisible();
+
+    const grupo = page.getByRole("radiogroup", { name: "Como deseja participar?", exact: true });
+    await expect(grupo).toHaveAttribute("aria-required", "true");
+
+    await page.check("#aceite");
+    await page.getByRole("button", { name: "Enviar cadastro" }).click();
+    await expect(grupo).toHaveAttribute("aria-invalid", "true");
+    await expect(grupo).toHaveAttribute("aria-describedby", /erro-participacao/);
+
+    await page.check("#participacao-doador");
+    await expect(grupo).toHaveAttribute("aria-invalid", "false");
+  });
+
+  test("a tabela de dados do gráfico tem legenda (caption) para leitores de tela", async ({ page }) => {
+    await page.goto(`${PAGINA}#/projetos`);
+    await page.getByText("Ver os dados em tabela").click();
+    await expect(page.getByRole("table", { name: "Arrecadação de cada campanha em relação à meta" })).toBeVisible();
   });
 });

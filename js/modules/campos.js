@@ -48,12 +48,12 @@ export function marcarCampo(formulario, nome, estado, mensagem = "") {
   const elementos = ehGrupo ? [...formulario.elements[nome]] : [elemento];
   elementos.forEach((campo) => campo.setCustomValidity(estado === "invalido" ? mensagem : ""));
 
-  if (!ehGrupo) {
-    if (estado === "neutro") {
-      elemento.removeAttribute("aria-invalid");
-    } else {
-      elemento.setAttribute("aria-invalid", String(estado === "invalido"));
-    }
+  // aria-invalid fica no próprio campo ou, nos rádios, no grupo (fieldset com role="radiogroup")
+  const alvoEstado = ehGrupo ? contenedor : elemento;
+  if (estado === "neutro") {
+    alvoEstado.removeAttribute("aria-invalid");
+  } else {
+    alvoEstado.setAttribute("aria-invalid", String(estado === "invalido"));
   }
 
   if (estado !== "invalido") {

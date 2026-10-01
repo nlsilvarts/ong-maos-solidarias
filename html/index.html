@@ -27,8 +27,9 @@
 
   <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
 
-  <!-- Barra de acessibilidade: a preferência fica salva no localStorage -->
-  <div class="barra-acessibilidade">
+  <!-- Barra de acessibilidade: região nomeada (marco), para ser encontrada pela lista de marcos
+       dos leitores de tela. As preferências ficam salvas no localStorage -->
+  <div class="barra-acessibilidade" role="region" aria-label="Recursos de acessibilidade">
     <button type="button" id="botao-texto-grande" class="botao-texto" aria-pressed="false">
       <span aria-hidden="true">A+</span> Texto maior
     </button>
