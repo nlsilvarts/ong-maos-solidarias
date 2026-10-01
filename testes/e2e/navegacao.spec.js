@@ -90,3 +90,14 @@ test.describe("Menu no celular", () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   });
 });
+
+test.describe("Cabeçalho em telas estreitas", () => {
+  for (const largura of [320, 390, 576]) {
+    test(`a ${largura} px, o logotipo mantém a proporção (56 × 56 px)`, async ({ page }) => {
+      await page.setViewportSize({ width: largura, height: 700 });
+      await page.goto(PAGINA);
+      const caixa = await page.locator("header img").boundingBox();
+      expect([Math.round(caixa.width), Math.round(caixa.height)]).toEqual([56, 56]);
+    });
+  }
+});
