@@ -341,8 +341,21 @@ nav {
   color: var(--cor-primaria-escura);
 }
 
-/* Submenu no celular: sempre visível, recuado abaixo de "Projetos" */
+/* Item com submenu: o link e o botão de divulgação ficam lado a lado,
+   e o submenu ocupa a linha de baixo */
+.tem-submenu {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.tem-submenu > a {
+  flex: 1 1 auto;
+}
+
+/* Submenu no celular: recuado abaixo de "Projetos" */
 .submenu {
+  flex-basis: 100%;
   list-style: none;
   margin: 0;
   padding: 0 0 0 var(--espaco-4);
@@ -351,6 +364,55 @@ nav {
 .submenu a {
   font-size: var(--texto-sm);
   font-weight: var(--peso-normal);
+}
+
+/* Botão de divulgação do submenu (padrão "disclosure" do WAI-ARIA).
+   Sem JavaScript ele não aparece, e o submenu fica sempre visível no celular */
+.submenu-toggle {
+  display: none;
+}
+
+.js .submenu-toggle {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  color: var(--cor-branco);
+  background: transparent;
+  border: none;
+  border-radius: var(--raio-sm);
+  cursor: pointer;
+  transition: background-color var(--transicao);
+}
+
+.js .submenu-toggle:hover {
+  background: var(--cor-primaria-escura);
+}
+
+/* Seta desenhada com bordas: aponta para baixo e gira quando o submenu abre */
+.submenu-toggle::before {
+  content: "";
+  width: 0.55em;
+  height: 0.55em;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-0.15em) rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.submenu-toggle[aria-expanded="true"]::before {
+  transform: translateY(0.15em) rotate(-135deg);
+}
+
+/* Com JavaScript, o submenu só aparece quando o botão está expandido */
+.js .submenu {
+  display: none;
+}
+
+.js .submenu-toggle[aria-expanded="true"] + .submenu {
+  display: block;
 }
 
 /* =========================================================
@@ -1172,28 +1234,20 @@ footer p {
   /* ---------- Dropdown ---------- */
   .tem-submenu {
     position: relative;
+    flex-wrap: nowrap;
+    gap: 0.125rem;
   }
 
-  /* Seta decorativa desenhada com bordas */
-  .tem-submenu > a::after {
-    content: "";
-    display: inline-block;
-    width: 0.4em;
-    height: 0.4em;
-    margin-left: 0.5em;
-    border-right: 2px solid currentColor;
-    border-bottom: 2px solid currentColor;
-    transform: translateY(-0.2em) rotate(45deg);
-    transition: transform 0.2s ease;
+  .js .submenu-toggle {
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--raio-pill);
   }
 
-  .tem-submenu:hover > a::after,
-  .tem-submenu:focus-within > a::after {
-    transform: translateY(0.05em) rotate(-135deg);
-  }
-
-  /* Submenu oculto por padrão */
-  .submenu {
+  /* Submenu flutuante, oculto por padrão */
+  .submenu,
+  .js .submenu {
+    display: block;
     position: absolute;
     top: 100%;
     left: 0;
@@ -1206,15 +1260,20 @@ footer p {
     opacity: 0;
     visibility: hidden;
     transform: translateY(-0.5rem);
-    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+    /* Ao fechar, o submenu some com transição e só então fica invisível (visibility) */
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
   }
 
-  /* Aparece com o mouse (:hover) ou com o teclado (:focus-within) */
-  .tem-submenu:hover > .submenu,
-  .tem-submenu:focus-within > .submenu {
+  /* Com JavaScript, abre pelo botão (clique, Enter ou Espaço) e fecha com Esc (menu.js).
+     Sem JavaScript, abre com o mouse ou com o foco do teclado.
+     Ao abrir, visibility muda na hora: os links já podem receber o foco no próximo Tab */
+  .js .submenu-toggle[aria-expanded="true"] + .submenu,
+  html:not(.js) .tem-submenu:hover > .submenu,
+  html:not(.js) .tem-submenu:focus-within > .submenu {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s;
   }
 
   .submenu a {

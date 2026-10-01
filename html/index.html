@@ -58,7 +58,9 @@
         <li><a href="#/inicio" data-rota="inicio">Início</a></li>
         <li class="tem-submenu">
           <a href="#/projetos" data-rota="projetos">Projetos</a>
-          <ul class="submenu">
+          <!-- Botão de divulgação (disclosure): abre e fecha o submenu e informa o estado com aria-expanded -->
+          <button type="button" class="submenu-toggle" aria-expanded="false" aria-controls="submenu-projetos" aria-label="Seções de Projetos"></button>
+          <ul class="submenu" id="submenu-projetos">
             <li><a href="#/projetos/projetos-em-andamento">Projetos em andamento</a></li>
             <li><a href="#/projetos/voluntariado">Como ser voluntário</a></li>
             <li><a href="#/projetos/campanhas">Campanhas de doação</a></li>

@@ -74,3 +74,41 @@ test.describe("WCAG 2.1 AA (axe-core)", () => {
     });
   });
 });
+
+test.describe("Semântica, teclado e WAI-ARIA", () => {
+  test("submenu: abre com Enter, é percorrido com Tab e fecha com Esc, devolvendo o foco ao botão", async ({ page }) => {
+    await page.goto(PAGINA);
+    const botao = page.getByRole("button", { name: "Seções de Projetos" });
+    const submenu = page.locator("#submenu-projetos");
+    await expect(botao).toHaveAttribute("aria-expanded", "false");
+    await expect(submenu).toBeHidden();
+
+    await botao.focus();
+    await page.keyboard.press("Enter");
+    await expect(botao).toHaveAttribute("aria-expanded", "true");
+    await expect(submenu).toBeVisible();
+
+    await page.keyboard.press("Tab");
+    await expect(submenu.getByRole("link", { name: "Projetos em andamento" })).toBeFocused();
+
+    await page.keyboard.press("Escape");
+    await expect(botao).toHaveAttribute("aria-expanded", "false");
+    await expect(botao).toBeFocused();
+    await expect(submenu).toBeHidden();
+  });
+
+  test("submenu: fecha quando o foco sai dele e quando uma seção é escolhida", async ({ page }) => {
+    await page.goto(PAGINA);
+    const botao = page.getByRole("button", { name: "Seções de Projetos" });
+
+    await botao.click();
+    for (let i = 0; i < 5; i += 1) await page.keyboard.press("Tab"); // 4 links do submenu e depois "Cadastro"
+    await expect(page.locator('#menu-principal a[data-rota="cadastro"]')).toBeFocused();
+    await expect(botao).toHaveAttribute("aria-expanded", "false");
+
+    await botao.click();
+    await page.getByRole("link", { name: "Campanhas de doação" }).click();
+    await expect(page).toHaveURL(/#\/projetos\/campanhas$/);
+    await expect(botao).toHaveAttribute("aria-expanded", "false");
+  });
+});
