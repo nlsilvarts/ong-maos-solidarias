@@ -187,7 +187,9 @@ html.texto-grande {
 /* ---------- Barra de acessibilidade ---------- */
 .barra-acessibilidade {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
+  gap: var(--espaco-2);
   padding: var(--espaco-1) var(--espaco-3);
   background-color: var(--cor-primaria-escura);
 }
@@ -209,6 +211,17 @@ html.texto-grande {
 
 .botao-texto:hover {
   background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Ícone do alto contraste: círculo com metade preenchida, desenhado com CSS
+   (não depende de a fonte ter o caractere ◐) */
+.icone-contraste {
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  background: linear-gradient(90deg, currentColor 50%, transparent 50%);
 }
 
 /* Botão ligado: fundo branco (aria-pressed também informa leitores de tela) */
@@ -1385,4 +1398,216 @@ footer p {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
+}
+
+/* =========================================================
+   11. Alto contraste
+   Ligado pelo botão "Alto contraste" (preferencias.js) ou, enquanto não houver
+   escolha salva, pela configuração do sistema (prefers-contrast: more).
+   Fundo preto, texto branco e amarelo nos links, botões e foco: contrastes de
+   21:1 e 19,6:1, acima dos 7:1 exigidos no nível AAA. As cores de estado
+   (sucesso, erro, aviso e informação) ficam entre 10:1 e 15:1 sobre o preto.
+   ========================================================= */
+
+html.alto-contraste {
+  --hc-fundo: #000000;
+  --hc-texto: #ffffff;
+  --hc-destaque: #ffff00;
+  --hc-sucesso: #7ee787;
+  --hc-erro: #ff9b9b;
+  --hc-aviso: #ffd75e;
+  --hc-info: #8fd0ff;
+
+  /* Tokens do Design System lidos pelos componentes e pelo gráfico */
+  --cor-texto: var(--hc-texto);
+  --cor-texto-suave: var(--hc-texto);
+  --cor-fundo: var(--hc-fundo);
+  --cor-foco: var(--hc-destaque);
+  --cor-borda-campo: var(--hc-texto);
+  --cor-grafico: var(--hc-destaque);
+  --cor-grade: #8c8c8c;
+  --cor-sucesso: var(--hc-sucesso);
+  --cor-erro: var(--hc-erro);
+  --cor-aviso: var(--hc-aviso);
+  --cor-info: var(--hc-info);
+  --cor-sucesso-fundo: var(--hc-fundo);
+  --cor-erro-fundo: var(--hc-fundo);
+  --cor-aviso-fundo: var(--hc-fundo);
+  --cor-info-fundo: var(--hc-fundo);
+  --cor-primaria-clara: var(--hc-fundo);
+  --cor-secundaria-clara: var(--hc-fundo);
+  --cor-neutra-clara: var(--hc-fundo);
+  --sombra: none;
+  --sombra-elevada: none;
+  --sombra-pressionada: none;
+  --anel-campo: none;
+
+  /* Controles nativos (seletor de data, lista do select, barras de rolagem) no tema escuro */
+  color-scheme: dark;
+}
+
+/* Superfícies: fundo preto e texto branco; bordas no lugar das sombras */
+html.alto-contraste body,
+html.alto-contraste header,
+html.alto-contraste footer,
+html.alto-contraste .barra-acessibilidade,
+html.alto-contraste .submenu,
+html.alto-contraste .cartao,
+html.alto-contraste form,
+html.alto-contraste .modal,
+html.alto-contraste .toast,
+html.alto-contraste pre,
+html.alto-contraste :is(input, select, textarea) {
+  color: var(--hc-texto);
+  background-color: var(--hc-fundo);
+}
+
+html.alto-contraste :is(.cartao, form, .modal, .toast, .submenu, pre) {
+  border: 2px solid var(--hc-texto);
+}
+
+html.alto-contraste .modal form {
+  border: none;
+}
+
+html.alto-contraste .modal::backdrop {
+  background-color: rgba(0, 0, 0, 0.85);
+}
+
+html.alto-contraste :is(header, .barra-acessibilidade) {
+  border-bottom: 2px solid var(--hc-texto);
+}
+
+html.alto-contraste footer {
+  border-top: 2px solid var(--hc-texto);
+}
+
+html.alto-contraste :is(.destaque, .historico) {
+  border: 2px solid var(--hc-texto);
+  border-left-width: 5px;
+}
+
+/* Textos que usavam o verde da marca */
+html.alto-contraste :is(h1, h2, h3, legend, main > h1) {
+  color: var(--hc-texto);
+}
+
+html.alto-contraste h2 {
+  border-bottom-color: var(--hc-destaque);
+}
+
+/* Links sempre amarelos e sublinhados */
+html.alto-contraste a,
+html.alto-contraste .grafico summary {
+  color: var(--hc-destaque);
+  text-decoration: underline;
+}
+
+html.alto-contraste .menu-lista a {
+  color: var(--hc-destaque);
+}
+
+html.alto-contraste .menu-lista a:hover,
+html.alto-contraste .menu-lista a[aria-current="page"],
+html.alto-contraste .submenu a:hover,
+html.alto-contraste .submenu a:focus-visible,
+html.alto-contraste .pular-conteudo {
+  color: var(--hc-fundo);
+  background: var(--hc-destaque);
+}
+
+/* Botões: contorno amarelo; com o mouse, o preenchimento inverte */
+html.alto-contraste :is(.botao, .botao-secundario) {
+  color: var(--hc-destaque);
+  background-color: var(--hc-fundo);
+  border: 2px solid var(--hc-destaque);
+}
+
+html.alto-contraste :is(.botao, .botao-secundario):is(:hover, :active):not(:disabled) {
+  color: var(--hc-fundo);
+  background-color: var(--hc-destaque);
+}
+
+/* Desabilitado: cinza claro e borda tracejada, sem depender de transparência */
+html.alto-contraste .botao:disabled {
+  opacity: 1;
+  color: #bfbfbf;
+  border: 2px dashed #bfbfbf;
+}
+
+html.alto-contraste :is(.botao-texto, .menu-toggle) {
+  color: var(--hc-destaque);
+  border-color: var(--hc-destaque);
+}
+
+html.alto-contraste .icone-linha {
+  background: var(--hc-destaque);
+}
+
+html.alto-contraste .submenu-toggle {
+  color: var(--hc-destaque);
+}
+
+html.alto-contraste :is(.botao-texto, .menu-toggle, .submenu-toggle):hover {
+  background-color: transparent;
+  outline: 2px dashed var(--hc-destaque);
+}
+
+html.alto-contraste .botao-texto[aria-pressed="true"] {
+  color: var(--hc-fundo);
+  background-color: var(--hc-destaque);
+}
+
+html.alto-contraste .botao-fechar:hover {
+  color: var(--hc-fundo);
+  background-color: var(--hc-destaque);
+}
+
+/* Formulário */
+html.alto-contraste fieldset {
+  border-color: var(--hc-texto);
+}
+
+html.alto-contraste :is(input, select, textarea):focus {
+  border-color: var(--hc-destaque);
+}
+
+html.alto-contraste input:is([type="radio"], [type="checkbox"]) {
+  accent-color: var(--hc-destaque);
+}
+
+/* Ícones dos campos nas cores de alto contraste */
+html.alto-contraste .campo-valido > input:is([type="text"], [type="email"], [type="tel"]) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%237ee787' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' d='M3 8.5l3.5 3.5L13 5'/%3E%3C/svg%3E");
+}
+
+html.alto-contraste .campo-invalido > input:is([type="text"], [type="email"], [type="tel"]) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%23ff9b9b'/%3E%3Cpath stroke='%23000' stroke-width='2' stroke-linecap='round' d='M8 4.5v4'/%3E%3Ccircle cx='8' cy='11.5' r='1.1' fill='%23000'/%3E%3C/svg%3E");
+}
+
+/* Componentes de feedback: cores claras de estado sobre o fundo preto */
+html.alto-contraste :is(.badge-sucesso, .alerta-sucesso, .toast-sucesso, .modal-sucesso) {
+  --fb-cor: var(--hc-sucesso);
+}
+
+html.alto-contraste :is(.badge-primaria, .badge-secundaria, .badge-neutra) {
+  --fb-cor: var(--hc-texto);
+}
+
+html.alto-contraste .icone-feedback,
+html.alto-contraste :is(.badge-sucesso, .badge-aviso, .badge-erro) {
+  color: var(--hc-fundo);
+}
+
+html.alto-contraste .badge {
+  border: 1px solid var(--fb-cor);
+}
+
+html.alto-contraste .alerta {
+  border: 2px solid var(--fb-cor);
+  border-left-width: 5px;
+}
+
+html.alto-contraste .toast {
+  border-left: 5px solid var(--fb-cor);
 }
