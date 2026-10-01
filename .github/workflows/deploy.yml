@@ -1,0 +1,77 @@
+# Integração contínua e deploy no GitHub Pages.
+#
+# A cada push na main e a cada pull request, o GitHub Actions instala as
+# dependências (npm ci), roda os testes de unidade, a verificação de contraste,
+# o build de produção e os testes de ponta a ponta no código-fonte e no build.
+# Se tudo passar e o push for na main, a pasta dist/ é publicada no GitHub Pages,
+# em https://<usuario>.github.io/<repositorio>/.
+#
+# Requisito: Settings > Pages > Build and deployment > Source: GitHub Actions
+# (o script publicar-no-github.sh já faz essa configuração).
+name: Testes e deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Testes e build de produção
+    runs-on: ubuntu-latest
+    steps:
+      - name: Código do repositório
+        uses: actions/checkout@v6
+
+      - name: Node.js 22, com cache do npm
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Dependências (versões exatas do package-lock.json)
+        run: npm ci
+
+      - name: Testes de unidade
+        run: npm test
+
+      - name: Contraste das cores
+        run: npm run contraste
+
+      - name: Build de produção
+        run: npm run build
+
+      - name: Navegador dos testes
+        run: npx playwright install --with-deps chromium
+
+      - name: Testes de ponta a ponta (código-fonte e build)
+        run: npx playwright test
+
+      - name: Pacote do site para o GitHub Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    name: Publicação no GitHub Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.publicacao.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - name: Publica a pasta dist/
+        id: publicacao
+        uses: actions/deploy-pages@v5
