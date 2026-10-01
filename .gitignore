@@ -13,3 +13,6 @@ Thumbs.db
 test-results/
 playwright-report/
 blob-report/
+
+# Build de produção (gerado por "npm run build")
+dist/

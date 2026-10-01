@@ -1,7 +1,10 @@
 /*
- * Servidor local para desenvolvimento e testes, sem dependências (só Node.js).
+ * Servidor local para desenvolvimento, testes e conferência do build, sem
+ * dependências (só Node.js).
  *
- * Uso: npm start   (ou: node ferramentas/servidor.js)
+ * Uso: npm start         serve o projeto (página em /html/index.html)
+ *      npm run preview   serve a pasta dist/, gerada por npm run build (página em /)
+ *      (ou: node ferramentas/servidor.js [pasta])
  * Porta: 8080, ou a definida na variável de ambiente PORT.
  *
  * O site usa módulos JavaScript (import/export), que os navegadores bloqueiam
@@ -10,11 +13,17 @@
  * (playwright.config.js) também iniciam este servidor.
  */
 import { createServer } from "node:http";
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { extname, join, normalize, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const RAIZ = resolve(fileURLToPath(new URL("..", import.meta.url)));
+const PROJETO = resolve(fileURLToPath(new URL("..", import.meta.url)));
+const PASTA = process.argv[2];
+// Pasta servida: a do projeto ou a indicada na linha de comando (por exemplo, dist)
+const RAIZ = resolve(PROJETO, PASTA ?? ".");
+// No projeto, a página fica em html/; no build de produção, na raiz da pasta
+const PAGINA = existsSync(join(RAIZ, "html", "index.html")) ? "/html/index.html" : "/";
 const PORTA = Number(process.env.PORT) || 8080;
 
 const TIPOS = {
@@ -22,6 +31,7 @@ const TIPOS = {
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
+  ".map": "application/json; charset=utf-8",
   ".md": "text/markdown; charset=utf-8",
   ".svg": "image/svg+xml",
   ".png": "image/png",
@@ -44,10 +54,13 @@ const servidor = createServer(async (requisicao, resposta) => {
     return responder(resposta, 400, "Endereço inválido");
   }
 
-  // A raiz leva à página da aplicação
-  if (caminho === "/") {
-    resposta.writeHead(302, { Location: "/html/index.html" });
+  // No projeto, a raiz leva à página da aplicação; no build, cada pasta serve o seu index.html
+  if (caminho === "/" && PAGINA !== "/") {
+    resposta.writeHead(302, { Location: PAGINA });
     return resposta.end();
+  }
+  if (caminho.endsWith("/")) {
+    caminho += "index.html";
   }
 
   // Não serve arquivos ocultos (.git, .gitignore) nem caminhos fora da pasta do projeto
@@ -66,6 +79,9 @@ const servidor = createServer(async (requisicao, resposta) => {
 });
 
 servidor.listen(PORTA, () => {
-  console.log(`ONG Mãos Solidárias em http://localhost:${PORTA}/html/index.html`);
+  if (!existsSync(RAIZ)) {
+    console.warn(`A pasta ${PASTA} não existe. Gere o build antes, com: npm run build`);
+  }
+  console.log(`ONG Mãos Solidárias em http://localhost:${PORTA}${PAGINA}${PASTA ? ` (pasta ${PASTA})` : ""}`);
   console.log("Pressione Ctrl+C para encerrar.");
 });
