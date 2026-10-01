@@ -10,13 +10,12 @@
   --cor-primaria-clara: #e3f2ea;   /* fundos de destaque, bordas de fieldset */
 
   /* ---------- Cores secundárias (laranja: energia, ação) ---------- */
-  --cor-secundaria: #f28c28;         /* detalhes decorativos e foco (sem texto) */
+  --cor-secundaria: #f28c28;         /* só detalhes decorativos: com texto branco, 2,45:1 */
   --cor-secundaria-escura: #a65300;  /* botões de ação com texto branco */
 
   /* ---------- Tons neutros ---------- */
   --cor-texto: #222222;        /* texto principal */
   --cor-texto-suave: #555555;  /* legendas, dicas, botão secundário */
-  --cor-borda: #bbbbbb;        /* bordas de campos */
   --cor-fundo: #fdfaf4;        /* fundo da página (off-white quente) */
   --cor-branco: #ffffff;       /* cartões, formulário, texto sobre cor */
 
@@ -1425,6 +1424,7 @@ html.alto-contraste {
   --hc-erro: #ff9b9b;
   --hc-aviso: #ffd75e;
   --hc-info: #8fd0ff;
+  --hc-desabilitado: #bfbfbf;
 
   /* Tokens do Design System lidos pelos componentes e pelo gráfico */
   --cor-texto: var(--hc-texto);
@@ -1539,8 +1539,8 @@ html.alto-contraste :is(.botao, .botao-secundario):is(:hover, :active):not(:disa
 /* Desabilitado: cinza claro e borda tracejada, sem depender de transparência */
 html.alto-contraste .botao:is(:disabled, [aria-disabled="true"]) {
   opacity: 1;
-  color: #bfbfbf;
-  border: 2px dashed #bfbfbf;
+  color: var(--hc-desabilitado);
+  border: 2px dashed var(--hc-desabilitado);
 }
 
 html.alto-contraste :is(.botao-texto, .menu-toggle) {
