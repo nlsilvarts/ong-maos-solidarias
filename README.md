@@ -1,18 +1,155 @@
 # ONG Mãos Solidárias – Projeto Front-end
 
-Site institucional da ONG construído como uma SPA (Single Page Application):
-uma única página HTML cujo conteúdo é trocado pelo JavaScript, sem recarregar o navegador.
+Site institucional da ONG Mãos Solidárias, construído como uma SPA (Single Page Application) em
+HTML, CSS e JavaScript puro: uma única página cujo conteúdo é trocado pelo JavaScript, sem
+recarregar o navegador e sem framework.
+
+## Sumário
+
+1. [Visão geral](#visão-geral)
+2. [Tecnologias](#tecnologias)
+3. [Pré-requisitos](#pré-requisitos)
+4. [Instalação](#instalação)
+5. [Como executar](#como-executar)
+6. [Build](#build)
+7. [Testes](#testes)
+8. [Estrutura de pastas](#estrutura-de-pastas)
+9. [Arquitetura](#arquitetura)
+10. [Rotas](#rotas)
+11. [Formulário de cadastro](#formulário-de-cadastro)
+12. [Dados salvos no navegador](#dados-salvos-no-navegador)
+13. [Gráfico com Chart.js](#gráfico-com-chartjs)
+14. [Componentes de feedback](#componentes-de-feedback)
+15. [Acessibilidade](#acessibilidade)
+16. [Versionamento e contribuição](#versionamento-e-contribuição)
+
+## Visão geral
+
+A ONG Mãos Solidárias é uma organização fictícia, criada para a disciplina, que atua em educação,
+segurança alimentar e meio ambiente. O site apresenta a instituição e os projetos, divulga as
+campanhas de doação e recebe o cadastro de voluntários e doadores.
+
+Principais funcionalidades:
+
+- **Navegação SPA** por hash (`#/inicio`, `#/projetos`, `#/cadastro`), com título da aba, foco e
+  botões Voltar e Avançar do navegador funcionando a cada troca de página.
+- **Cadastro** com máscaras de CPF, telefone e CEP e verificação de consistência em tempo real
+  (dígitos do CPF, idade mínima, DDD), com resumo de erros e links para os campos.
+- **Persistência no navegador** (localStorage): preferência "Texto maior", rascunho do cadastro e
+  histórico dos envios.
+- **Gráfico de arrecadação** das campanhas com Chart.js, carregado só na página de projetos.
+- **Componentes de feedback** reutilizáveis: badges, alertas, toasts e modais.
+- **Layout responsivo** com Grid de 12 colunas, cinco breakpoints e menu hambúrguer no celular.
+
+O projeto não tem back-end: o envio do cadastro é simulado no próprio navegador.
+
+## Tecnologias
+
+| Tecnologia | Versão | Uso no projeto |
+|---|---|---|
+| HTML5 | — | Estrutura semântica (`header`, `nav`, `main`, `section`, `article`, `form`, `fieldset`, `dialog`) |
+| CSS3 | — | Design System em variáveis, Grid de 12 colunas, Flexbox e media queries mobile-first |
+| JavaScript (ES Modules) | ES2020 | Roteador, templates, validação, máscaras e persistência, sem framework |
+| [Chart.js](https://www.chartjs.org/) | 4.5.1 | Gráfico de barras das campanhas |
+| [esbuild](https://esbuild.github.io/) | 0.28.2 | Empacota o Chart.js em um único arquivo local |
+| [Node.js](https://nodejs.org/) e npm | 20 ou superior | Servidor local, build e testes |
+| `node:test` | nativo do Node.js | Testes de unidade |
+| [Playwright](https://playwright.dev/) | 1.56.0 | Testes de ponta a ponta no Chromium |
+| [W3C Nu Html Checker](https://validator.w3.org/nu/) | — | Validação do HTML e do CSS |
+| Git | — | Versionamento com GitFlow e Conventional Commits |
+
+## Pré-requisitos
+
+- **Navegador atualizado** (Chrome, Edge, Firefox ou Safari), com suporte a ES Modules e ao
+  elemento `<dialog>`.
+- **Node.js 20 ou superior**, que já inclui o npm. É necessário para o servidor local, o build e
+  os testes. Confira a versão com `node --version`.
+- **Git**, para clonar o repositório e seguir o fluxo de branches.
+- Opcional: **VS Code** com a extensão **Live Server**, para apenas visualizar o site sem instalar
+  o Node.js.
+
+## Instalação
+
+```bash
+git clone <endereço-do-repositório>
+cd ong-maos-solidarias
+npm install                        # Chart.js, esbuild e Playwright (dependências de desenvolvimento)
+npx playwright install chromium    # navegador usado nos testes de ponta a ponta
+```
+
+Para instalar exatamente as versões registradas no `package-lock.json` (por exemplo, em integração
+contínua), use `npm ci` no lugar de `npm install`.
+
+O site em si não depende de nenhum pacote: o Chart.js já está empacotado em `js/vendor/`. As
+dependências do npm servem para gerar esse pacote e rodar os testes.
 
 ## Como executar
 
-A aplicação usa módulos JavaScript (`import`/`export`), que os navegadores bloqueiam
-quando o arquivo é aberto direto do computador (`file://`). Por isso, abra o projeto
-por um servidor local:
+```bash
+npm start
+```
 
-- **VS Code:** abra a pasta do projeto, clique com o botão direito em `html/index.html`
-  e escolha **Open with Live Server**; ou
-- **Terminal:** na pasta do projeto, rode `python -m http.server` e acesse
+O comando inicia o servidor local (`ferramentas/servidor.js`, sem dependências) e mostra o endereço
+`http://localhost:8080/html/index.html`. Para usar outra porta: `PORT=3000 npm start`
+(no PowerShell: `$env:PORT=3000; npm start`).
+
+Alternativas sem Node.js:
+
+- **VS Code:** clique com o botão direito em `html/index.html` e escolha **Open with Live Server**;
+- **Python:** na pasta do projeto, rode `python -m http.server` e acesse
   `http://localhost:8000/html/index.html`.
+
+> Abrir o `index.html` direto do disco (`file://`) não funciona, porque os navegadores bloqueiam
+> módulos JavaScript nesse modo. Nesse caso, a página mostra um aviso com estas instruções.
+
+## Build
+
+```bash
+npm run build
+```
+
+Gera de novo o arquivo `js/vendor/chart.esm.js` com o esbuild: o Chart.js 4.5.1 vira um único
+ES Module minificado (cerca de 148 KB), só com os componentes do gráfico de barras listados em
+`ferramentas/chart-entrada.js`. A licença MIT do Chart.js fica no fim do arquivo.
+
+O arquivo gerado é versionado para que o site funcione sem Node.js e sem CDN. Rode o build apenas
+ao atualizar o Chart.js ou mudar os componentes importados. HTML, CSS e o restante do JavaScript
+não passam por build: são servidos como estão.
+
+## Testes
+
+| Comando | O que executa | Ferramenta |
+|---|---|---|
+| `npm test` | Testes de unidade, sem navegador | `node:test`, nativo do Node.js |
+| `npm run test:e2e` | Testes de ponta a ponta no Chromium | Playwright |
+
+**Unidade (`testes/unidade/`):** regras de validação (CPF, idade, telefone, CEP e demais campos),
+máscaras, templates (inclusive o `escapar()` contra HTML injetado), percentual das campanhas,
+leitura e gravação no localStorage (com um armazenamento em memória) e histórico de envios.
+
+**Ponta a ponta (`testes/e2e/`):** o Playwright inicia o servidor local, abre o Chromium e usa o
+site como uma pessoa usaria:
+
+- `navegacao.spec.js`: rotas, título da aba, foco, Voltar e Avançar, página não encontrada,
+  link "Pular para o conteúdo" e menu no celular;
+- `cadastro.spec.js`: máscaras, verificação em tempo real, resumo de erros e envio. Inclui o teste
+  de regressão do defeito corrigido na versão 1.0.1 (foco ao fechar o modal);
+- `persistencia.spec.js`: preferência de texto, rascunho sem CPF e dados corrompidos no localStorage;
+- `grafico.spec.js`: carregamento sob demanda do Chart.js, destruição do gráfico ao sair da página
+  e tabela alternativa quando a biblioteca não carrega.
+
+Comandos úteis:
+
+```bash
+npx playwright test testes/e2e/cadastro.spec.js   # executa um arquivo só
+npx playwright test --headed                       # mostra o navegador durante os testes
+npx playwright show-report                         # abre o relatório da última execução
+```
+
+**Validação W3C:** o `html/index.html`, o HTML gerado por cada rota e os dois arquivos CSS foram
+validados no [W3C Nu Html Checker](https://validator.w3.org/nu/), sem erros. Para conferir o HTML
+gerado por uma rota, copie o elemento `<html>` no DevTools (Copy outerHTML) e cole na opção
+"Text input" do validador.
 
 ## Estrutura de pastas
 
@@ -20,9 +157,12 @@ por um servidor local:
 ong-maos-solidarias/
 ├── README.md                 Esta documentação
 ├── CHANGELOG.md              Histórico de versões
-├── .gitignore                Arquivos que não entram no repositório (node_modules)
-├── package.json              Dependências de desenvolvimento (chart.js, esbuild) e script de build
+├── package.json              Scripts (start, build, test, test:e2e) e dependências de desenvolvimento
+├── package-lock.json         Versões exatas das dependências instaladas
+├── playwright.config.js      Configuração dos testes de ponta a ponta
+├── .gitignore                Arquivos fora do repositório (node_modules, relatórios de teste)
 ├── ferramentas/
+│   ├── servidor.js           Servidor local sem dependências (npm start)
 │   └── chart-entrada.js      Entrada do pacote do Chart.js (só os componentes usados)
 ├── html/
 │   └── index.html            Casca da SPA: cabeçalho, menu, <main> vazio e rodapé
@@ -32,7 +172,7 @@ ong-maos-solidarias/
 ├── js/
 │   ├── main.js               Ponto de entrada: importa e inicia os módulos
 │   ├── vendor/
-│   │   ├── chart.esm.js      Chart.js 4.5.1 empacotado em um único ES Module (gerado)
+│   │   ├── chart.esm.js      Chart.js 4.5.1 empacotado em um único ES Module (gerado pelo build)
 │   │   └── LICENSE-chart.js.md  Licença MIT do Chart.js
 │   └── modules/
 │       ├── router.js         Roteador por hash (#/inicio, #/projetos, #/cadastro)
@@ -56,13 +196,26 @@ ong-maos-solidarias/
 │           ├── cadastro.js
 │           ├── componentes.js
 │           └── nao-encontrada.js
+├── testes/
+│   ├── unidade/              Testes de unidade (*.test.js), executados com node:test
+│   └── e2e/                  Testes de ponta a ponta (*.spec.js), executados com Playwright
 └── imagens/                  Imagens otimizadas em dois formatos (JPG/PNG + WebP)
 ```
 
-## Organização dos módulos
+## Arquitetura
 
-Cada arquivo de `js/modules` tem uma única responsabilidade e se comunica pelos `export` e
-`import` do ES6. As dependências seguem um só sentido, sem ciclos:
+O `html/index.html` é a casca fixa da aplicação. Ele carrega `js/main.js` como módulo, e o
+`main.js` inicia a preferência de texto, o menu, os componentes de feedback, as máscaras e o
+roteador. A cada mudança no endereço (evento `hashchange`), o roteador:
+
+1. chama `sair()` da página anterior (por exemplo, para destruir o gráfico);
+2. coloca no `<main>` o HTML devolvido por `render()` da nova página;
+3. atualiza o título da aba e o item ativo do menu (`aria-current`);
+4. chama `iniciar()` para ligar os eventos da página;
+5. rola até a seção pedida e move o foco para o título.
+
+Cada arquivo de `js/modules` tem uma única responsabilidade e se comunica pelos `export` e `import`
+do ES6, sem variáveis globais. As dependências seguem um só sentido, sem ciclos:
 `main.js` → `router.js` → páginas → templates, dados e controladores → módulos-base
 (`dados`, `validacao`, `armazenamento`, `campos`, `resumo-erros`, `mascaras`, `menu`),
 que não importam nenhum outro módulo do projeto.
@@ -80,19 +233,21 @@ que não importam nenhum outro módulo do projeto.
 
 Os botões Voltar e Avançar do navegador funcionam normalmente, e o título da aba muda a cada página.
 
-## Validação
+## Formulário de cadastro
 
-- A casca `html/index.html`, os arquivos CSS e o HTML gerado por todas as rotas foram
-  validados com o W3C Nu Html Checker, sem erros nem avisos.
-- O formulário é verificado em JavaScript (`js/modules/validacao.js`), em tempo real e no envio:
-  nome com sobrenome, e-mail com domínio, CPF com dígitos verificadores, idade mínima de 16 anos,
-  DDD e celular, CEP, número (ou S/N), cidade, estado, forma de participação e aceite da LGPD.
+- O formulário usa `novalidate`, e a verificação fica com o JavaScript (`js/modules/validacao.js`),
+  em tempo real e no envio: nome com sobrenome, e-mail com domínio, CPF com dígitos verificadores,
+  idade mínima de 16 anos, DDD e celular, CEP, número (ou S/N), cidade, estado, forma de
+  participação e aceite da LGPD.
+- Cada campo é verificado ao perder o foco e, a partir daí, a cada digitação. As mensagens aparecem
+  abaixo do campo, ligadas a ele por `aria-describedby`.
+- No envio com erros, um alerta no topo lista os problemas, com links que levam a cada campo.
 - Os atributos nativos (`required`, `pattern`, `min`/`max`, `maxlength`) continuam no HTML
   documentando as regras, e `setCustomValidity()` mantém a validação nativa coerente com a do script.
 
-## Dados salvos no navegador (localStorage)
+## Dados salvos no navegador
 
-Todas as chaves começam com `ong-maos-solidarias:`.
+Todas as chaves do localStorage começam com `ong-maos-solidarias:`.
 
 | Chave | Estrutura | Quando é gravada | Quando é restaurada |
 |---|---|---|---|
@@ -104,27 +259,20 @@ Por privacidade, o rascunho não guarda o CPF nem o aceite da LGPD. Dados corrom
 formato esperado são ignorados, e textos lidos do armazenamento passam por `escapar()` antes de
 entrar no HTML.
 
-## Biblioteca externa: Chart.js
+## Gráfico com Chart.js
 
 O gráfico "Quanto já arrecadamos" (página de projetos) usa o **Chart.js 4.5.1**, instalado pelo
-npm e empacotado com o **esbuild** em um único ES Module local (`js/vendor/chart.esm.js`), com
-apenas os componentes de um gráfico de barras. Assim o site não depende de CDN e funciona offline.
+npm e empacotado com o **esbuild** em um único ES Module local (veja [Build](#build)). Assim o site
+não depende de CDN e funciona offline.
 
 - A biblioteca é carregada sob demanda, com `import()`, só quando a página de projetos é aberta.
 - Não cria variáveis globais; a instância é destruída (`destroy()`) quando o usuário sai da página.
-- Se o arquivo não carregar, a página mostra a tabela com os mesmos dados.
-
-Para gerar o pacote de novo (requer Node.js):
-
-```
-npm install
-npm run build:vendor
-```
+- Se o arquivo não carregar, a página mostra uma tabela com os mesmos dados.
 
 ## Componentes de feedback
 
-A rota `#/componentes` documenta badges, alertas, toasts e modais. Os comportamentos
-funcionam só com atributos no HTML:
+A rota `#/componentes` documenta badges, alertas, toasts e modais. Os comportamentos funcionam só
+com atributos no HTML:
 
 - `data-toast="Mensagem"` e `data-toast-tipo="sucesso"` mostram um toast;
 - `data-abrir-modal="id-do-dialog"` abre um modal;
@@ -132,13 +280,25 @@ funcionam só com atributos no HTML:
 
 Tipos disponíveis: `info`, `sucesso`, `aviso` e `erro`.
 
-## Versionamento (GitFlow)
+## Acessibilidade
+
+- Link "Pular para o conteúdo" e foco levado ao título da página a cada troca de rota.
+- Menu com `aria-expanded` e `aria-controls`, que fecha com Esc; item atual marcado com
+  `aria-current="page"`.
+- Campos com erro recebem `aria-invalid`, e o resumo de erros usa `role="alert"`.
+- Toasts em uma região `aria-live="polite"`; modais com o elemento nativo `<dialog>`.
+- Gráfico com `role="img"` e descrição no `aria-label`, além da tabela com os mesmos dados.
+- Cores de texto do Design System com contraste de pelo menos 4,5:1 (WCAG AA), foco visível com
+  `:focus-visible` e animações reduzidas com `prefers-reduced-motion`.
+- Preferência "Texto maior", salva no navegador.
+
+## Versionamento e contribuição
 
 O repositório segue o modelo GitFlow:
 
 | Branch | Função | Origem | Destino |
 |---|---|---|---|
-| `main` | Código publicado; cada versão recebe uma tag (`v1.0.0`, `v1.0.1`) | — | — |
+| `main` | Código publicado; cada versão recebe uma tag (`v1.0.0`, `v1.0.1`...) | — | — |
 | `develop` | Integração contínua do que está pronto para a próxima versão | `main` | `release/*` |
 | `feature/*` | Uma funcionalidade por branch (ex.: `feature/grafico-campanhas`) | `develop` | `develop` |
 | `release/*` | Preparação de uma versão: número, CHANGELOG e revisão final | `develop` | `main` e `develop` |
@@ -149,26 +309,26 @@ Os merges usam `--no-ff`, para que cada funcionalidade apareça como um bloco no
 
 Fluxo de uma nova funcionalidade:
 
-```
+```bash
 git checkout develop
 git checkout -b feature/nome-da-funcionalidade
 # ...commits...
+npm test && npm run test:e2e      # os testes precisam passar antes do merge
 git checkout develop
 git merge --no-ff feature/nome-da-funcionalidade
 ```
 
-## Padrão de commits
-
-As mensagens seguem o Conventional Commits, no formato `tipo(escopo): descrição no imperativo`:
+As mensagens de commit seguem o Conventional Commits, no formato `tipo(escopo): descrição no imperativo`:
 
 | Tipo | Uso | Exemplo |
 |---|---|---|
 | `feat` | Nova funcionalidade | `feat(projetos): adiciona gráfico de arrecadação das campanhas` |
 | `fix` | Correção de defeito | `fix(cadastro): devolve o foco ao título do histórico ao fechar o modal` |
 | `refactor` | Mudança interna sem alterar o comportamento | `refactor(cadastro): separa estado dos campos e resumo de erros em módulos` |
+| `test` | Testes automatizados | `test: adiciona testes de ponta a ponta com Playwright` |
 | `docs` | Documentação | `docs: documenta estrutura, execução, módulos e versionamento no README` |
-| `build` | Dependências e empacotamento | `build: empacota o Chart.js 4.5.1 com esbuild` |
+| `build` | Dependências, empacotamento e ferramentas | `build: empacota o Chart.js 4.5.1 com esbuild` |
 | `chore` | Tarefas de manutenção e versões | `chore(release): prepara a versão 1.0.0` |
 
-As versões seguem o Versionamento Semântico (MAIOR.MENOR.CORREÇÃO), e as mudanças de cada
-versão estão no `CHANGELOG.md`.
+As versões seguem o Versionamento Semântico (MAIOR.MENOR.CORREÇÃO), e as mudanças de cada versão
+estão no [CHANGELOG.md](CHANGELOG.md).
