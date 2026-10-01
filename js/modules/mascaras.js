@@ -1,7 +1,7 @@
 /*
  * Máscaras de entrada para CPF, telefone e CEP.
- * Apenas formatam a digitação; a validação continua sendo feita
- * pelos atributos nativos do HTML5 (pattern, required, maxlength).
+ * Apenas formatam a digitação; a verificação dos valores fica com
+ * validacao.js, chamado pelo controlador do formulário (formulario.js).
  */
 export function aplicarMascara(valor, tipo) {
   let numeros = valor.replace(/\D/g, "");
